@@ -3,6 +3,7 @@ import gsap from "gsap";
 import Draggable from "gsap/Draggable";
 import { MusicRNN, Player, sequences } from "@magenta/music";
 import octaveFromPitch from '../scripts/octaveFromPitch';
+import Bar from './Bar';
 
 export default class WorkspaceComponent extends Component {
     state = {
@@ -26,23 +27,7 @@ export default class WorkspaceComponent extends Component {
             this.state.player.polySynth.volume._initialValue = 0.5
             this.state.player.bassSynth.volume._initialValue = 0.5
             this.state.model.initialize();
-            gsap.registerPlugin(Draggable);
-
-            Draggable.create(".rect", {
-                type: "x,y",
-                bounds: ".notes-holder",
-                liveSnap: {
-                    points: function (point) {
-                        let el = document.getElementById("nh")
-                        let notePosY = el.getBoundingClientRect().height / 12
-
-                        if(point.y % notePosY !== 0) {
-                            point.y = Math.floor(point.y / notePosY) * notePosY
-                        }
-                        return point
-                    },
-                  },
-              });
+            this.setupGridAndNotes();
         })
     }
 
@@ -100,6 +85,27 @@ export default class WorkspaceComponent extends Component {
         }
     }
 
+    setupGridAndNotes = () => {
+        let el = document.getElementById("nh")
+        let elHeight = el.getBoundingClientRect().height
+        let noteHeight =  elHeight / 12
+
+        gsap.registerPlugin(Draggable);
+
+            Draggable.create(".rect", {
+                type: "x,y",
+                bounds: ".notes-holder",
+                liveSnap: {
+                    points: function (point) {
+                        if(point.y % noteHeight !== 0) {
+                            point.y = Math.floor(point.y / noteHeight) * noteHeight
+                        }
+                        return point
+                    },
+                  },
+              });
+    }
+
   render() {
     return (
       <div className='workspace-container'>
@@ -111,9 +117,14 @@ export default class WorkspaceComponent extends Component {
             }</div>
             <div className="notes-wrapper">
                 <div className="notes-holder" id="nh">
-                    <div class="wrapper">
-                        <div class="flair rect"></div>
-                    </div>
+                        <div className="wrapper">
+                            <div className="flair rect"></div>
+                        </div>
+                </div>
+                <div className='grid-canvas' id='gc'>
+                    <Bar/>
+                    <Bar/>
+                    <Bar/>
                 </div>
             </div>
         </div>
