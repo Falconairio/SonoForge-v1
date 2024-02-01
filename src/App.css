@@ -1,6 +1,8 @@
 html, body, .App, #root {
   width: 100%;
   height: 100%;
+  background-color: #000000;
+  font-family: 'Cabin', sans-serif;
 }
 
 .App {
@@ -10,37 +12,117 @@ html, body, .App, #root {
   align-items: center;
 }
 
-#drop_zone {
-  border: 2px solid orange;
-  width: 200px;
-  height: 100px;
+.main-activity-container {
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.box-holder {
+.top-bar-mainactivity {
+  position: absolute;
+  top: 0;
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
-  width: 100vw;
+  justify-content: space-between;
+  color: white;
+  width: 100%;
 }
 
-.tester {
+.top-bar-title {
+  margin-left: 3rem;
+}
+
+.top-bar-items {
+  margin-right: 3rem;
+  text-decoration: none;
+  color: white;
+}
+
+#homelink, #aboutlink {
+  text-decoration: none;
+  color: white;
+}
+
+.recognizer-container {
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80vw;
+  height: 70vh;
+  border: 1px solid black;
+  border-radius: 0.5rem;
+  background-color: #bfbfa7;
 }
 
-.box1 {
-  border: 1px solid blue;
+.finish-recording-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 300px;
+  height: 300px;
 }
 
-.box2 {
-  border: 1px solid red;
+.recording-page-button {
+  width: 10rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  background-color: transparent;
+  border: 2px solid black;
+  color: black;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: 'Cabin', sans-serif;
 }
 
-.box3 {
-  border: 1px solid green;
+.workspace-container {
+  width: 100%;
 }
 
-.box4 {
-  border: 1px solid purple;
+.notes-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-evenly;
+}
+
+.notes-column {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  text-align: center;
+  height: 38rem;
+  width: 5rem;
+  font-size: 1.6rem;
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.notes-wrapper {
+  background-color: #ffffff;
+  width: 50rem;
+  height: 38rem;
+  border-radius: 10px;
+  overflow: auto;
+}
+
+.notes-holder {
+  width: 101vw;
+  height: 100%;
+}
+
+.rect {
+  cursor: pointer;
+  width: 70px;
+  height: 70px;
+  max-height: 15vh;
+  max-width: 15vh;
+  background-color: green;
 }

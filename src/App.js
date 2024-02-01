@@ -1,13 +1,18 @@
 import React from "react";
 import './App.css';
-import RecognizerComponent from "./RecognizerComponent";
+import { Outlet, Link } from "react-router-dom";
 
 export default function App() {
   return (
     <div className="App">
-    <div className="box-holder">
-        <RecognizerComponent />
+      <div className="top-bar-mainactivity">
+          <h1 className="top-bar-title">MusicMaker</h1>
+          <div className="top-bar-items">
+              <Link to="/" id = "homelink">Home</Link>
+              <Link to="/about" id = "aboutlink">About</Link>
+          </div>
       </div>
+      <Outlet />
     </div>
   );
 }
