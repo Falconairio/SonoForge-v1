@@ -22,8 +22,10 @@ export default class WorkspaceComponent extends Component {
 
     componentDidMount = () => {
         this.setState({
-            player: new Player()
+            player: new Player(),
+            currentSequence: this.props.notes
         }, () => {
+            console.log(this.state.currentSequence);
             this.state.player.polySynth.volume._initialValue = 0.5
             this.state.player.bassSynth.volume._initialValue = 0.5
             this.state.model.initialize();

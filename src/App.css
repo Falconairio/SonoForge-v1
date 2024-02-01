@@ -74,8 +74,7 @@ html, body, .App, #root {
   height: 70vh;
   border: 1px solid black;
   border-radius: 0.5rem;
-  background-color: #bfbfa7;
-  color: black;
+  background-color: rgba(0, 0, 0, 0.01);
 }
 
 .finish-recording-box {
@@ -92,12 +91,12 @@ html, body, .App, #root {
   height: 2.5rem;
   border-radius: 10px;
   background-color: transparent;
-  border: 2px solid black;
-  color: black;
+  border: 2px solid white;
   font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   font-family: 'Cabin', sans-serif;
+  color: white
 }
 
 .workspace-container {
@@ -143,7 +142,6 @@ html, body, .App, #root {
 .notes-holder {
   z-index: 2;
   background-color: rgba(0, 0, 0, 0.01);
-  width: 101vw;
 }
 
 .grid-canvas, .notes-holder {

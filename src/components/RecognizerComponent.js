@@ -23,7 +23,7 @@ export default class RecognizerComponent extends Component {
 
     componentDidMount = () => {
         this.setState({
-            player: new Player()
+            player: new Player(),
         }, () => {
             this.state.player.polySynth.volume._initialValue = 0.5
             this.state.player.bassSynth.volume._initialValue = 0.5
@@ -199,16 +199,28 @@ export default class RecognizerComponent extends Component {
         this.setState({ seconds: seconds })
     }
 
+    submit = () => {
+        this.props.complete(this.state.noteSequence)
+    }
+
   render() {
     return (
     <div className='recognizer-container'>
         {
             !this.state.isRecording && this.state.notes.length === 0 
             ? 
-            <button className='recording-page-button'
-            onClick={() => {
-                this.handleStartStopRecognition()
-                }}>Start Recording</button> 
+            <div className='options-box'>
+            <select name="timesignatures" id="cars">
+                <option value="2/2">Volvo</option>
+                <option value="3/4">Saab</option>
+                <option value="4/4">Mercedes</option>
+                <option value="audi">Audi</option>
+            </select>
+                <button className='recording-page-button'
+                onClick={() => {
+                    this.handleStartStopRecognition()
+                    }}>Start Recording</button> 
+            </div>
             : 
             <div className='recording-container'>
                 {
@@ -241,7 +253,7 @@ export default class RecognizerComponent extends Component {
                         Rerecord
                         </button>
                         <button className="recording-page-button"
-                        onClick={this.props.complete}>
+                        onClick={this.submit}>
                         Continue
                         </button>
                     </div>
