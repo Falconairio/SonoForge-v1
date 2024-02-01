@@ -125,6 +125,7 @@ export default class WorkspaceComponent extends Component {
                     <Bar/>
                     <Bar/>
                     <Bar/>
+                    <Bar/>
                 </div>
             </div>
         </div>
