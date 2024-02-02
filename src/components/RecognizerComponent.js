@@ -18,7 +18,7 @@ export default class RecognizerComponent extends Component {
         seconds: 0,
         timerCallback: null,
         source: null,
-        inputStream: null
+        inputStream: null,
     }
 
     componentDidMount = () => {
@@ -210,16 +210,47 @@ export default class RecognizerComponent extends Component {
             !this.state.isRecording && this.state.notes.length === 0 
             ? 
             <div className='options-box'>
-            <select name="timesignatures" id="cars">
-                <option value="2/2">Volvo</option>
-                <option value="3/4">Saab</option>
-                <option value="4/4">Mercedes</option>
-                <option value="audi">Audi</option>
-            </select>
-                <button className='recording-page-button'
-                onClick={() => {
-                    this.handleStartStopRecognition()
-                    }}>Start Recording</button> 
+
+            <div className="recognizer-columns">
+                <div className="recognizer-column">
+                    <h2 className="recognizer-column-title">
+                        Quantization:
+                        <span className='tooltip'>Tooltip Text</span>
+                    </h2>
+                    <h2 className="recognizer-column-title">
+                        Tempo/BPM:
+                        <span className='tooltip'>Tooltip Text</span>
+                    </h2>
+                    <h2 className="recognizer-column-title">
+                        Time Signature:
+                        <span className='tooltip'>Tooltip Text</span>
+                    </h2>
+                </div>
+                <div className="recognizer-column">
+                    <select name="quantization" id="qz">
+                        <option value={1}>Whole/Semibreave</option>
+                        <option value={2}>Half/Minim</option>
+                        <option value={4}>Quarter/Crochet</option>
+                        <option value={8}>Eighth/Quaver</option>
+                        <option value={16}>Sixteenth/Semiquaver</option>
+                        <option value={32}>Thirty-Second/Demisemiquaver</option>
+                    </select>
+                    <input type = "number" defaultValue={60}/>
+                    <select name="timesignatures" id="ts">
+                        <option value="2/2">2/2</option>
+                        <option value="3/4">3/4</option>
+                        <option value="4/4">4/4</option>
+                        <option value="5/4">5/4</option>
+                        <option value="6/8">6/8</option>
+                    </select>
+                </div>
+            </div>
+            <button className='recording-page-button'
+            onClick={() => {
+                this.handleStartStopRecognition()
+                }}>Start Recording</button> 
+
+            <p>Mouse over titles to see an explanation</p>
             </div>
             : 
             <div className='recording-container'>
