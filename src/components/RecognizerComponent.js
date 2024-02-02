@@ -3,7 +3,6 @@ import { MusicRNN, Player, sequences } from "@magenta/music";
 import autoCorrelate from "./../scripts/autocorrelate";
 import generateLookupTable from "./../scripts/noteLTableGenerator";
 import octaveFromPitch from '../scripts/octaveFromPitch';
-import Timeline from './Timeline';
 
 export default class RecognizerComponent extends Component {
     state = {
@@ -19,15 +18,32 @@ export default class RecognizerComponent extends Component {
         timerCallback: null,
         source: null,
         inputStream: null,
+        selectedTS: "4/4",
+        selectedQZ: 16,
+        selectedTP: 60,
+        inputsInView: true
     }
 
     componentDidMount = () => {
         this.setState({
             player: new Player(),
         }, () => {
+            this.handleSetSelects()
             this.state.player.polySynth.volume._initialValue = 0.5
             this.state.player.bassSynth.volume._initialValue = 0.5
         })
+    }
+
+    handleSetSelects = () => {
+        if(this.state.inputsInView) {
+            let qz = document.getElementById("qz")
+            let ts = document.getElementById("ts")
+            let tp = document.getElementById("tp")
+
+            qz.value = this.state.selectedQZ
+            ts.value = this.state.selectedTS
+            tp.value = this.state.selectedTP
+        }
     }
 
     handleStartStopRecognition = () => {
@@ -37,7 +53,7 @@ export default class RecognizerComponent extends Component {
             })
 
             let callback = setInterval(this.updateTimer, 1000)
-            this.setState({timerCallback: callback})
+            this.setState({timerCallback: callback, inputsInView: false})
 
             this.recognize()
         } else {
@@ -74,7 +90,11 @@ export default class RecognizerComponent extends Component {
     }
 
     clearSequence = () => {
-        this.setState({notes: [], noteSequence: {notes: [], totalTime: 0}})
+        this.setState({notes: [], 
+            noteSequence: {notes: [], totalTime: 0},
+            inputsInView: true} , () => {
+                this.handleSetSelects()
+            })
     }
 
     addNoteToSequence = (note) => {
@@ -215,7 +235,9 @@ export default class RecognizerComponent extends Component {
                 <div className="recognizer-column">
                     <h2 className="recognizer-column-title">
                         Quantization:
-                        <span className='tooltip'>Tooltip Text</span>
+                        <span className='tooltip'>
+                        Quantization is the closest your note can get to the 
+                        </span>
                     </h2>
                     <h2 className="recognizer-column-title">
                         Tempo/BPM:
@@ -227,7 +249,9 @@ export default class RecognizerComponent extends Component {
                     </h2>
                 </div>
                 <div className="recognizer-column">
-                    <select name="quantization" id="qz">
+                    <select name="quantization" id="qz" onChange={
+                        (event) => {this.setState({"selectedQZ": parseInt(event.target.value)})}
+                            }defaultValue={this.state.selectedQZ}>
                         <option value={1}>Whole/Semibreave</option>
                         <option value={2}>Half/Minim</option>
                         <option value={4}>Quarter/Crochet</option>
@@ -235,8 +259,12 @@ export default class RecognizerComponent extends Component {
                         <option value={16}>Sixteenth/Semiquaver</option>
                         <option value={32}>Thirty-Second/Demisemiquaver</option>
                     </select>
-                    <input type = "number" defaultValue={60}/>
-                    <select name="timesignatures" id="ts">
+                    <input type = "number" id = "tp" onChange={
+                        (event) => {this.setState({"selectedTP": parseInt(event.target.value)})}
+                    }/>
+                    <select name="timesignatures" id="ts" onChange={
+                        (event) => {this.setState({"selectedTS": event.target.value})}
+                    }>
                         <option value="2/2">2/2</option>
                         <option value="3/4">3/4</option>
                         <option value="4/4">4/4</option>

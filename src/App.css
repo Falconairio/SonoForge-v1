@@ -119,7 +119,7 @@ html, body, .App, #root {
 /* Tooltip text */
 .tooltip {
   visibility: hidden;
-  width: 120px;
+  width: 15rem;
   background-color: white;
   color: black;
   text-align: center;
@@ -128,6 +128,7 @@ html, body, .App, #root {
   top: -5px;
   right: 105%;
   font-style: italic;
+  font-size: 1rem;
  
   /* Position the tooltip text - see examples below! */
   position: absolute;
