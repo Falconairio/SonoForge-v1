@@ -47,30 +47,37 @@ export default class RecognizerComponent extends Component {
     }
 
     handleStartStopRecognition = () => {
-        if(!this.state.isRecording) {
-            this.setState({
-                isRecording: true
-            })
+        if(this.state.selectedTP >= 60 && this.state.selectedTP <= 250) {
+            if(!this.state.isRecording) {
+                this.setState({
+                    isRecording: true
+                })
 
-            let callback = setInterval(this.updateTimer, 1000)
-            this.setState({timerCallback: callback, inputsInView: false})
+                let callback = setInterval(this.updateTimer, 1000)
+                this.setState({timerCallback: callback, inputsInView: false})
 
-            this.recognize()
-        } else {
-            this.state.inputStream.getTracks().forEach(function(track) {
-                track.stop();
-            });
-            this.state.inputStream = null;
+                this.recognize()
+            } else {
+                this.state.inputStream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+                this.state.inputStream = null;
 
-            clearInterval(this.state.timerCallback)
-            if(this.state.notes.length === 0) {
-                alert('No notes recognized. Please try again.')
+                clearInterval(this.state.timerCallback)
+                if(this.state.notes.length === 0) {
+                    alert('No notes recognized. Please try again.')
+                }
+                document.getElementById('note').innerText = ""
+                this.setState({
+                    isRecording: false, 
+                    timerCallback: null
+                }, () => {
+                    this.handleSetSelects()
+                })
             }
-            document.getElementById('note').innerText = ""
-            this.setState({
-                isRecording: false, 
-                timerCallback: null
-            })
+        } else {
+            alert("Please select a tempo within the range 60-250, otherwise your" +
+                "composition will be near impossible to play :)")
         }
     }
 
@@ -235,17 +242,33 @@ export default class RecognizerComponent extends Component {
                 <div className="recognizer-column">
                     <h2 className="recognizer-column-title">
                         Quantization:
-                        <span className='tooltip'>
-                        Quantization is the closest your note can get to the 
+                        <span className='tooltip tt1'>
+                        Quantization is the closest your note can get to the selected note 
+                        length while playing. When your input is recognized any notes will
+                        be rounded to the nearest value of what has been selected. This 
+                        will make your computed audio more accurate to what you played, but 
+                        can cause inconsistencies due to tiny frequency changes being picked
+                        up as different notes.
                         </span>
                     </h2>
                     <h2 className="recognizer-column-title">
                         Tempo/BPM:
-                        <span className='tooltip'>Tooltip Text</span>
+                        <span className='tooltip tt2'>
+                        The Tempo, or more simply the Beats Per Minute, is the number of single
+                        beats that come within one minute of music. What you select for this will
+                        work in conjunction with with the time signature to generate the correct
+                        representation for your recorded music.
+                        </span>
                     </h2>
                     <h2 className="recognizer-column-title">
                         Time Signature:
-                        <span className='tooltip'>Tooltip Text</span>
+                        <span className='tooltip tt3'>
+                        The Time Signature signifies which type of note makes up a beat, as well
+                        as how many beats exist in a bar. The number on the left denotes the latter
+                        and the number on the right denotes the former. For example, a time signature
+                        of 4/4 means that 4 notes a quarter in length make up a bar. However a time
+                        signature of 2/4 means that a bar holds 2 notes a quarter in length.
+                        </span>
                     </h2>
                 </div>
                 <div className="recognizer-column">
@@ -260,16 +283,20 @@ export default class RecognizerComponent extends Component {
                         <option value={32}>Thirty-Second/Demisemiquaver</option>
                     </select>
                     <input type = "number" id = "tp" onChange={
-                        (event) => {this.setState({"selectedTP": parseInt(event.target.value)})}
+                        (event) => {
+                            console.log(parseInt(event.target.value))
+                            this.setState({"selectedTP": parseInt(event.target.value)})}
                     }/>
                     <select name="timesignatures" id="ts" onChange={
                         (event) => {this.setState({"selectedTS": event.target.value})}
                     }>
                         <option value="2/2">2/2</option>
+                        <option value="2/4">2/4</option>
                         <option value="3/4">3/4</option>
                         <option value="4/4">4/4</option>
                         <option value="5/4">5/4</option>
                         <option value="6/8">6/8</option>
+                        <option value="3/8">3/8</option>
                     </select>
                 </div>
             </div>
