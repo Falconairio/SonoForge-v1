@@ -65,7 +65,9 @@ export default class RecognizerComponent extends Component {
 
                 clearInterval(this.state.timerCallback)
                 if(this.state.notes.length === 0) {
+                    this.setState({ inputsInView: true})
                     alert('No notes recognized. Please try again.')
+                    
                 }
                 document.getElementById('note').innerText = ""
                 this.setState({
