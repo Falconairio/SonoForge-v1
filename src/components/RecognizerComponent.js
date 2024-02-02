@@ -246,9 +246,9 @@ export default class RecognizerComponent extends Component {
                         Quantization:
                         <span className='tooltip tt1'>
                         Quantization is the closest your note can get to the selected note 
-                        length while playing. When your input is recognized any notes will
+                        length while playing. When your input is recognized, any notes will
                         be rounded to the nearest value of what has been selected. This 
-                        will make your computed audio more accurate to what you played, but 
+                        will make your computed audio more accurate to what was played, but 
                         can cause inconsistencies due to tiny frequency changes being picked
                         up as different notes.
                         </span>
@@ -258,7 +258,7 @@ export default class RecognizerComponent extends Component {
                         <span className='tooltip tt2'>
                         The Tempo, or more simply the Beats Per Minute, is the number of single
                         beats that come within one minute of music. What you select for this will
-                        work in conjunction with with the time signature to generate the correct
+                        work in conjunction with the time signature to generate the correct
                         representation for your recorded music.
                         </span>
                     </h2>
@@ -268,7 +268,7 @@ export default class RecognizerComponent extends Component {
                         The Time Signature signifies which type of note makes up a beat, as well
                         as how many beats exist in a bar. The number on the left denotes the latter
                         and the number on the right denotes the former. For example, a time signature
-                        of 4/4 means that 4 notes a quarter in length make up a bar. However a time
+                        of 4/4 means that 4 notes a quarter in length make up a bar. Likewise, a time
                         signature of 2/4 means that a bar holds 2 notes a quarter in length.
                         </span>
                     </h2>
