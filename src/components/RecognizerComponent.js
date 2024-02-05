@@ -134,7 +134,6 @@ export default class RecognizerComponent extends Component {
         var streamSetter = this.setStream
         var lookupTable = generateLookupTable();
         var checkRecording = this.isRecording;
-        var smoothingValue = 'basic';
     
           navigator.mediaDevices.getUserMedia(constraints)
             .then(
@@ -155,20 +154,6 @@ export default class RecognizerComponent extends Component {
             var startingTime = 0.0;
             var heldNote = "";
             var heldNoteOctave = 0
-            var smoothingCount = 0;
-            var smoothingThreshold = 5;
-            var smoothingCountThreshold = 5;
-
-            if (smoothingValue === 'none') {
-                smoothingThreshold = 99999;
-                smoothingCountThreshold = 0;
-              } else if (smoothingValue === 'basic') {
-                smoothingThreshold = 10;
-                smoothingCountThreshold = 5;
-              } else {
-                smoothingThreshold = 5;
-                smoothingCountThreshold = 10;
-              }
         
             // Thanks to PitchDetect: https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
             var noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -184,8 +169,6 @@ export default class RecognizerComponent extends Component {
     
             var currentNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
             var currentOctave = octaveFromPitch(autoCorrelateValue);
-
-            // console.log(lookupTable);
 
             if (autoCorrelateValue === -1) {
                 if(heldNote.length > 0) {
@@ -224,15 +207,6 @@ export default class RecognizerComponent extends Component {
                 console.log(error)
             }
           }
-
-        // function noteIsSimilarEnough() {
-        //     // Check threshold for number, or just difference for notes.
-        //     if (typeof(valueToDisplay) == 'number') {
-        //         return Math.abs(valueToDisplay - previousValueToDisplay) < smoothingThreshold;
-        //     } else {
-        //         return valueToDisplay === previousValueToDisplay;
-        //     }
-        // }
 
         var noteFromPitch = (frequency) => {
             var noteNum = 12 * (Math.log( frequency / 440 )/Math.log(2) );
