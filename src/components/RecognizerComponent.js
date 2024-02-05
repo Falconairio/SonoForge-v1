@@ -134,6 +134,7 @@ export default class RecognizerComponent extends Component {
         var streamSetter = this.setStream
         var lookupTable = generateLookupTable();
         var checkRecording = this.isRecording;
+        var smoothingValue = 'basic';
     
           navigator.mediaDevices.getUserMedia(constraints)
             .then(
@@ -154,6 +155,20 @@ export default class RecognizerComponent extends Component {
             var startingTime = 0.0;
             var heldNote = "";
             var heldNoteOctave = 0
+            var smoothingCount = 0;
+            var smoothingThreshold = 5;
+            var smoothingCountThreshold = 5;
+
+            if (smoothingValue === 'none') {
+                smoothingThreshold = 99999;
+                smoothingCountThreshold = 0;
+              } else if (smoothingValue === 'basic') {
+                smoothingThreshold = 10;
+                smoothingCountThreshold = 5;
+              } else {
+                smoothingThreshold = 5;
+                smoothingCountThreshold = 10;
+              }
         
             // Thanks to PitchDetect: https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
             var noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -209,6 +224,15 @@ export default class RecognizerComponent extends Component {
                 console.log(error)
             }
           }
+
+        // function noteIsSimilarEnough() {
+        //     // Check threshold for number, or just difference for notes.
+        //     if (typeof(valueToDisplay) == 'number') {
+        //         return Math.abs(valueToDisplay - previousValueToDisplay) < smoothingThreshold;
+        //     } else {
+        //         return valueToDisplay === previousValueToDisplay;
+        //     }
+        // }
 
         var noteFromPitch = (frequency) => {
             var noteNum = 12 * (Math.log( frequency / 440 )/Math.log(2) );
@@ -315,19 +339,20 @@ export default class RecognizerComponent extends Component {
                     this.state.isRecording 
                     ? 
                     <div className="recording-box">
-                        <div className='recording-top-row'>
-                            <button onClick={() => {
-                                this.handleStartStopRecognition()
-                                }}>Stop Recording</button> 
-                            <div>
-                                <h1>Currently Played Note:</h1>
-                                <h2 id="note"></h2>
-                            </div>
+                        <div className="current-note flexrow">
+                            <h2>Currently Played Note:</h2>
+                            <h2 id="note">None</h2>
+                        </div>
+                        <div className="flexrow">
+                            <button className='recording-page-button'
+                            onClick={() => {
+                                    this.handleStartStopRecognition()
+                                    }}>Stop Recording
+                            </button> 
                             <div className='timer'>{
-                                this.state.seconds > 0
-                                ? this.state.seconds + "seconds"
-                                : null
-                            }</div>
+                                    this.state.seconds + " seconds"
+                                }
+                            </div>
                         </div>
                     </div>
                     : 
