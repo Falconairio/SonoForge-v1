@@ -19,7 +19,7 @@ export default class RecognizerComponent extends Component {
         source: null,
         inputStream: null,
         selectedTS: "4/4",
-        selectedQZ: 16,
+        selectedQZ: 4,
         selectedTP: 60,
         inputsInView: true
     }
@@ -96,6 +96,7 @@ export default class RecognizerComponent extends Component {
             this.state.player.stop();
         }
         this.state.player.start(this.state.noteSequence)
+        console.log(this.state.noteSequence)
     }
 
     clearSequence = () => {
@@ -129,13 +130,16 @@ export default class RecognizerComponent extends Component {
         analyser.minDecibels = -100;
         analyser.maxDecibels = -10;
         analyser.smoothingTimeConstant = 0.85;
-        var constraints = {audio: true};
         var stateSetter = this.addNoteToSequence
         var streamSetter = this.setStream
         var lookupTable = generateLookupTable();
         var checkRecording = this.isRecording;
+        const amountToRound = this.state.selectedQZ
+        const tempo = this.state.selectedTP;
+        const beatLengthInSeconds = 60/tempo
+        const typeOfBeat = parseInt(this.state.selectedTS.charAt(2))
     
-          navigator.mediaDevices.getUserMedia(constraints)
+          navigator.mediaDevices.getUserMedia({audio: true})
             .then(
               function(stream) {
                 // Initialize the SourceNode
@@ -159,9 +163,11 @@ export default class RecognizerComponent extends Component {
             var noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
       
           var updateNote = function () {
+
             if(checkRecording()) {
                 requestAnimationFrame(updateNote)
             }
+
             var bufferLength = analyser.fftSize;
             var buffer = new Float32Array(bufferLength);
             analyser.getFloatTimeDomainData(buffer);
@@ -170,16 +176,22 @@ export default class RecognizerComponent extends Component {
             var currentNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
             var currentOctave = octaveFromPitch(autoCorrelateValue);
 
+            let noteLengthToRoundTo = typeOfBeat/amountToRound * beatLengthInSeconds
+            let st = roundToNearest(startingTime,noteLengthToRoundTo)
+            let et = roundToNearest(audioContext.currentTime,noteLengthToRoundTo)
+            //if there is no note detected on this loop
             if (autoCorrelateValue === -1) {
+                //and there was a note being held
                 if(heldNote.length > 0) {
-                    if(audioContext.currentTime - startingTime > 0.15) {
+                    //CHANGE THIS TO ROUND
+                    if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2) {
                         let note = {pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
-                        startTime: startingTime, endTime: audioContext.currentTime}
+                        startTime: st, 
+                        endTime: st !== et ? et : et + noteLengthToRoundTo}
                         stateSetter(note)
                     }
                     heldNote = ""
                     heldNoteOctave = 0
-                   
                 }
                 try {
                     document.getElementById('note').innerText = 'None';
@@ -188,23 +200,36 @@ export default class RecognizerComponent extends Component {
                 } finally {
                     return;
                 }
+            //if there IS a note detected on this loop
             } else {
+                //and it is DIFFERENT to the note 
                 if(currentNote !== heldNote) {
-                    if(heldNote.length > 0 && audioContext.currentTime - startingTime > 0.125) {
+                    //and it is close enough to the note length we need to round to, as well as the held note
+                    //not being empty
+                    if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0) {
                         let note = {pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
-                        startTime: roundToNearest(startingTime,0.125), 
-                        endTime: roundToNearest(audioContext.currentTime,0.125)}
+                        startTime: st, 
+                        endTime: st !== et ? et : et + noteLengthToRoundTo}
                         stateSetter(note)
+
+                        try {
+                            document.getElementById('note').innerText = currentNote + currentOctave;
+                        } catch (error) {
+                            console.log(error)
+                        }
                     }
                     startingTime = audioContext.currentTime
                     heldNote = currentNote
                     heldNoteOctave = currentOctave
+                } else {
+                    if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0) {
+                        try {
+                            document.getElementById('note').innerText = currentNote + currentOctave;
+                        } catch (error) {
+                            console.log(error)
+                        }
+                    }
                 }
-            }
-            try {
-                document.getElementById('note').innerText = currentNote + currentOctave;
-            } catch (error) {
-                console.log(error)
             }
           }
 
@@ -284,19 +309,18 @@ export default class RecognizerComponent extends Component {
                     </select>
                     <input type = "number" id = "tp" onChange={
                         (event) => {
-                            console.log(parseInt(event.target.value))
                             this.setState({"selectedTP": parseInt(event.target.value)})}
                     }/>
                     <select name="timesignatures" id="ts" onChange={
                         (event) => {this.setState({"selectedTS": event.target.value})}
                     }>
-                        <option value="2/2">2/2</option>
+                        {/* <option value="2/2">2/2</option> */}
                         <option value="2/4">2/4</option>
                         <option value="3/4">3/4</option>
                         <option value="4/4">4/4</option>
                         <option value="5/4">5/4</option>
-                        <option value="6/8">6/8</option>
-                        <option value="3/8">3/8</option>
+                        {/* <option value="6/8">6/8</option>
+                        <option value="3/8">3/8</option> */}
                     </select>
                 </div>
             </div>
