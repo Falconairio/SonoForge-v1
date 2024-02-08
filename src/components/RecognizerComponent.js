@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { MusicRNN, Player, sequences } from "@magenta/music";
+import { Player } from "@magenta/music";
 import autoCorrelate from "./../scripts/autocorrelate";
 import generateLookupTable from "./../scripts/noteLTableGenerator";
 import octaveFromPitch from '../scripts/octaveFromPitch';
@@ -65,7 +65,7 @@ export default class RecognizerComponent extends Component {
 
                 clearInterval(this.state.timerCallback)
                 if(this.state.notes.length === 0) {
-                    this.setState({ inputsInView: true})
+                    this.setState({ inputsInView: true, seconds: 0})
                     alert('No notes recognized. Please try again.')
                     
                 }
@@ -96,13 +96,13 @@ export default class RecognizerComponent extends Component {
             this.state.player.stop();
         }
         this.state.player.start(this.state.noteSequence)
-        console.log(this.state.noteSequence)
     }
 
     clearSequence = () => {
         this.setState({notes: [], 
             noteSequence: {notes: [], totalTime: 0},
-            inputsInView: true} , () => {
+            inputsInView: true,
+            seconds: 0 } , () => {
                 this.handleSetSelects()
             })
     }
@@ -252,7 +252,11 @@ export default class RecognizerComponent extends Component {
     }
 
     submit = () => {
-        this.props.complete(this.state.noteSequence)
+        this.props.complete(
+            this.state.noteSequence,
+            this.state.selectedTS,
+            this.state.selectedQZ,
+            this.state.selectedTP)
     }
 
   render() {

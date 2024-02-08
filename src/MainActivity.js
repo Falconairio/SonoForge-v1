@@ -7,15 +7,21 @@ import { Link } from 'react-router-dom';
 class MainActivity extends Component {
     state = {
         renderComponent: 'input',
-        noteSequence: null
+        noteSequence: null,
+        selectedTS: "",
+        selectedQZ: 0,
+        selectedTP: 0,
     };
 
     switchComponent = (componentName) => {
         this.setState({ renderComponent: componentName });
     }
 
-    takeOutNoteSequence = (noteSequence) => {
+    takeOutMusicData = (noteSequence,ts,qz,tp) => {
         this.setState({ noteSequence: noteSequence,
+                        selectedTS: ts,
+                        selectedQZ: qz,
+                        selectedTP: tp, 
                         renderComponent: 'main' });
     }
 
@@ -25,7 +31,7 @@ class MainActivity extends Component {
         switch(this.state.renderComponent) {
             case 'input':
                 componentToRender = <RecognizerComponent 
-                complete = {this.takeOutNoteSequence}/>;
+                complete = {this.takeOutMusicData}/>;
                 break;
             case 'main':
                 componentToRender = <WorkspaceComponent
