@@ -17,13 +17,19 @@ export default class WorkspaceComponent extends Component {
             totalTime: 0
         },
         changedSequence: null,
-        noteArr : ["B","A#", "A", "G#", "G", "F#", "F", "E", "D#", "D", "C#", "C"]
+        noteArr : ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+        selectedTS: "4/4",
+        selectedQZ: 4,
+        selectedTP: 60,
     }
 
     componentDidMount = () => {
         this.setState({
             player: new Player(),
-            currentSequence: this.props.notes
+            currentSequence: this.props.notes,
+            selectedTS: this.props.ts,
+            selectedQZ: this.props.qz,
+            selectedTP: this.props.tp,
         }, () => {
             this.state.player.polySynth.volume._initialValue = 0.5
             this.state.player.bassSynth.volume._initialValue = 0.5
@@ -76,11 +82,23 @@ export default class WorkspaceComponent extends Component {
         let octave = octaveFromPitch(note.pitch)
         switch(octave) {
             case 0:
-                return "blue"
+                return ".blue"
             case 1:
-                return "red"
+                return ".red"
             case 2:
-                return "green"
+                return ".green"
+            case 3:
+                return ".yellow"
+            case 4:
+                return ".orange"
+            case 5:
+                return ".purple"
+            case 6:
+                return ".pink"
+            case 7:
+                return ".teal"
+            case 8:
+                return ".brown"
             default:
                 return
         }
@@ -93,18 +111,29 @@ export default class WorkspaceComponent extends Component {
 
         gsap.registerPlugin(Draggable);
 
-            Draggable.create(".rect", {
-                type: "x,y",
-                bounds: ".notes-holder",
-                liveSnap: {
-                    points: function (point) {
-                        if(point.y % noteHeight !== 0) {
-                            point.y = Math.floor(point.y / noteHeight) * noteHeight
-                        }
-                        return point
-                    },
-                  },
-              });
+        // this.state.currentSequence.notes.map((value,index) => {
+        //     let pitch = value.pitch
+        //     let colorClass = this.octaveToColor(octaveFromPitch(pitch))
+            
+        //     Draggable.create(".rect " + colorClass, {
+        //         type: "x,y",
+        //         x: 0,
+        //         y: 0,
+        //         bounds: ".notes-holder",
+        //         liveSnap: {
+        //             points: function (point) {
+        //                 if(point.y % noteHeight !== 0) {
+        //                     point.y = Math.floor(point.y / noteHeight) * noteHeight
+        //                 }
+        //                 return point
+        //             },
+        //           },
+        //       });
+        // })
+
+        
+
+            
     }
 
   render() {

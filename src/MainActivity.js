@@ -36,7 +36,10 @@ class MainActivity extends Component {
             case 'main':
                 componentToRender = <WorkspaceComponent
                 complete = {this.takeOutNoteSequence}
-                notes = {this.state.noteSequence} />;
+                notes = {this.state.noteSequence}
+                ts = {this.state.selectedTS}
+                tp = {this.state.selectedTP}
+                qz = {this.state.selectedQZ} />;
                 break;
             case 'output':
                 componentToRender = <NotationComponent />;
