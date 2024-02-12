@@ -41,15 +41,15 @@ var r2 = SIZE - 1;
 var threshold = 0.2;
 
 // Walk up for r1
-for (var i = 0; i < SIZE / 2; i++) {
-    if (Math.abs(buffer[i]) < threshold) {
+for (var k = 0; k < SIZE / 2; k++) {
+    if (Math.abs(buffer[k]) < threshold) {
     r1 = i;
     break;
     }
 }
 
 // Walk down for r2
-for (var i = 1; i < SIZE / 2; i++) {
+for (i = 1; i < SIZE / 2; i++) {
     if (Math.abs(buffer[SIZE - i]) < threshold) {
     r2 = SIZE - i;
     break;
@@ -63,7 +63,7 @@ SIZE = buffer.length
 // Create a new array of the sums of offsets to do the autocorrelation
 var c = new Array(SIZE).fill(0);
 // For each potential offset, calculate the sum of each buffer value times its offset value
-for (let i = 0; i < SIZE; i++) {
+for (i = 0; i < SIZE; i++) {
     for (let j = 0; j < SIZE - i; j++) {
     c[i] = c[i] + buffer[j] * buffer[j+i]
     }
@@ -78,7 +78,7 @@ while (c[d] > c[d+1]) {
 // Iterate from that index through the end and find the maximum sum
 var maxValue = -1;
 var maxIndex = -1;
-for (var i = d; i < SIZE; i++) {
+for (i = d; i < SIZE; i++) {
     if (c[i] > maxValue) {
     maxValue = c[i];
     maxIndex = i;

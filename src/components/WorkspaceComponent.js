@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import { MusicRNN, Player, sequences } from "@magenta/music";
-import octaveFromPitch from '../scripts/octaveFromPitch';
-import Bar from './Bar';
 import generateLookupTable from "./../scripts/noteLTableGenerator";
 import Timeline from './Timeline';
+import ReactGridLayout from 'react-grid-layout';
 
 export default class WorkspaceComponent extends Component {
     state = {
@@ -28,7 +27,7 @@ export default class WorkspaceComponent extends Component {
         this.setState({
             player: new Player(),
             currentSequence: this.props.notes,
-            selectedTS: "4/4",
+            selectedTS: this.props.ts,
             selectedQZ: this.props.qz,
             selectedTP: this.props.tp,
             lookupTable: generateLookupTable()
@@ -37,8 +36,6 @@ export default class WorkspaceComponent extends Component {
             this.state.player.bassSynth.volume._initialValue = 0.5
             this.state.model.initialize();
             this.setupGridAndNotes();
-            console.log("bars: " + this.calculateNoBars())
-            console.log("ts: " + this.state.selectedTS[0])
         })
     }
 
@@ -192,6 +189,14 @@ export default class WorkspaceComponent extends Component {
         })
     }
 
+    returnLayout = () => {
+        return [
+            { i: "a", x: 0, y: 0, w: 1, h: 2, static: true },
+            { i: "b", x: 1, y: 0, w: 3, h: 2, minW: 2, maxW: 4 },
+            { i: "c", x: 4, y: 0, w: 1, h: 2 }
+          ];
+    }
+
   render() {
     return (
       <div className='workspace-container'>
@@ -203,17 +208,14 @@ export default class WorkspaceComponent extends Component {
             }</div>
             <div className="notes-wrapper">
                 <div className="notes-holder" id="nh">
-                {/* <ReactGridLayout
+                <ReactGridLayout
                     className="layout"
-                    layout={layout}
+                    layout={this.returnLayout}
                     cols={12}
                     rowHeight={30}
-                    width={1200}
+                    width={100}
                 >
-                    <div key="a">a</div>
-                    <div key="b">b</div>
-                    <div key="c">c</div>
-                </ReactGridLayout> */}
+                </ReactGridLayout>
                 </div>
                 <div className='grid-canvas' id='gc'>
                     <Timeline 
