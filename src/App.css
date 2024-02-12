@@ -251,6 +251,12 @@ html, body, .App, #root {
   grid-row: 1;
 }
 
+.timeline-container {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
 .bar-container {
   height: 100%;
   display: flex;

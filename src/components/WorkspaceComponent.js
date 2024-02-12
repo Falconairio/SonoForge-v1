@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
-import gsap from "gsap";
-import Draggable from "gsap/Draggable";
 import { MusicRNN, Player, sequences } from "@magenta/music";
 import octaveFromPitch from '../scripts/octaveFromPitch';
 import Bar from './Bar';
 import generateLookupTable from "./../scripts/noteLTableGenerator";
+import Timeline from './Timeline';
 
 export default class WorkspaceComponent extends Component {
     state = {
@@ -29,7 +28,7 @@ export default class WorkspaceComponent extends Component {
         this.setState({
             player: new Player(),
             currentSequence: this.props.notes,
-            selectedTS: this.props.ts,
+            selectedTS: "4/4",
             selectedQZ: this.props.qz,
             selectedTP: this.props.tp,
             lookupTable: generateLookupTable()
@@ -38,6 +37,8 @@ export default class WorkspaceComponent extends Component {
             this.state.player.bassSynth.volume._initialValue = 0.5
             this.state.model.initialize();
             this.setupGridAndNotes();
+            console.log("bars: " + this.calculateNoBars())
+            console.log("ts: " + this.state.selectedTS[0])
         })
     }
 
@@ -142,12 +143,15 @@ export default class WorkspaceComponent extends Component {
         }
     }
 
+    calculateNoBars = () => {
+        let beatLengthInSeconds = 60/this.state.selectedTP
+        return (this.state.currentSequence.totalTime / beatLengthInSeconds)/this.state.selectedTS[0]
+    }
+
     setupGridAndNotes = () => {
         let el = document.getElementById("nh")
         let elHeight = el.getBoundingClientRect().height
         let noteHeight =  elHeight / 12
-
-        gsap.registerPlugin(Draggable);
 
         let noteHolder = document.getElementById("nh")
         
@@ -159,45 +163,33 @@ export default class WorkspaceComponent extends Component {
             let colorClass = this.octaveToColor(octave)
             let heightAdjust = this.noteToHeightAdjust(note)
 
-            let wrapper = document.createElement("div")
-            wrapper.className = "wrapper"
-            let draggable = document.createElement("div")
-            draggable.id = `drag${index}`
-            draggable.classList.add("rect")
-            draggable.classList.add(colorClass)
-            wrapper.appendChild(draggable)
-            noteHolder.appendChild(wrapper)
+            // let wrapper = document.createElement("div")
+            // wrapper.className = "wrapper"
+            // let draggable = document.createElement("div")
+            // draggable.id = `drag${index}`
+            // draggable.classList.add("rect")
+            // draggable.classList.add(colorClass)
+            // // draggable.setAttribute("style", "transform: translate3d(50px, 0px, 0px)")
+            // wrapper.appendChild(draggable)
+            // noteHolder.appendChild(wrapper)
+           
 
-            Draggable.create(`#drag${index}`, {
-                type: "x,y",
-                x: index * 100,
-                y: heightAdjust * noteHeight,
-                bounds: ".notes-holder",
-                liveSnap: {
-                    points: function (point) {
-                        if(point.y % noteHeight !== 0) {
-                            point.y = Math.floor(point.y / noteHeight) * noteHeight
-                        }
-                        return point
-                    },
-                  },
-              });
+            // let drag = Draggable.create(`#drag${index}`, {
+            //     type: "x,y",
+            //     bounds: ".notes-holder",
+            //     liveSnap: {
+            //         points: function (point) {
+            //             if(point.y % noteHeight !== 0) {
+            //                 point.y = Math.floor(point.y / noteHeight) * noteHeight
+            //             }
+            //             return point
+            //         },
+            //       },
+            //   });
+            // //   draggable.setAttribute("style", "transform: translate3d(50px, 0px, 0px)")
+            // //   draggable.setAttribute("style", `transform: translate3d(${index * 100}px, ${noteHeight * heightAdjust}px, 0px)`)
+            // wrapper.setAttribute("style", "margin-top: 100px")
         })
-
-        // Draggable.create(`#drag0`, {
-        //     type: "x,y",
-        //     bounds: ".notes-holder",
-        //     liveSnap: {
-        //         points: function (point) {
-        //             console.log("hello");
-        //             if(point.y % noteHeight !== 0) {
-        //                 point.y = Math.floor(point.y / noteHeight) * noteHeight
-        //             }
-        //             return point
-        //         },
-        //       },
-        //   });
-  
     }
 
   render() {
@@ -211,12 +203,23 @@ export default class WorkspaceComponent extends Component {
             }</div>
             <div className="notes-wrapper">
                 <div className="notes-holder" id="nh">
+                {/* <ReactGridLayout
+                    className="layout"
+                    layout={layout}
+                    cols={12}
+                    rowHeight={30}
+                    width={1200}
+                >
+                    <div key="a">a</div>
+                    <div key="b">b</div>
+                    <div key="c">c</div>
+                </ReactGridLayout> */}
                 </div>
                 <div className='grid-canvas' id='gc'>
-                    <Bar/>
-                    <Bar/>
-                    <Bar/>
-                    <Bar/>
+                    <Timeline 
+                    noBars = {this.calculateNoBars()} 
+                    noBeats = {parseInt(this.state.selectedTS[0])} 
+                    />
                 </div>
             </div>
         </div>

@@ -1,14 +1,14 @@
-import React, { Component } from 'react'
+import React from 'react'
+import Bar from './Bar'
 
-export default class Timeline extends Component {
-    
-    state = {
-        notes: this.props.notes
-    }
-
-  render() {
-    return (
-      <div>Timeline</div>
-    )
-  }
+export default function Timeline(props) {
+  return (
+    <div className='timeline-container'>
+      {
+        [...Array(props.noBars).keys()].map((value, index) => {
+          return <Bar key = {index} noCols = {props.noBeats}/>
+        })
+      }
+    </div>
+  )
 }
