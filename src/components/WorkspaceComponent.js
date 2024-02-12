@@ -193,13 +193,13 @@ export default class WorkspaceComponent extends Component {
 
     returnLayout = () => {
         return [
-            { i: "a", x: 0, y: 0, w: 1, h: 1, isResizable: false},
+            { i: "a", x: 0, y: 6, w: 1, h: 1, isResizable: false},
             { i: "b", x: 0, y: 1, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "c", x: 0, y: 2, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "d", x: 0, y: 3, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "e", x: 0, y: 4, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "f", x: 0, y: 5, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "g", x: 0, y: 6, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "g", x: 0, y: 0, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "h", x: 0, y: 7, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "i", x: 0, y: 8, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "j", x: 0, y: 9, w: 1, h: 1, isDraggable: false, isResizable: false},
