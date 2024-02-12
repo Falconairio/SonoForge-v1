@@ -251,6 +251,10 @@ html, body, .App, #root {
   grid-row: 1;
 }
 
+.grid-holder {
+  height: 100%;
+}
+
 .timeline-container {
   height: 100%;
   display: flex;

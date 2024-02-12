@@ -3,6 +3,8 @@ import { MusicRNN, Player, sequences } from "@magenta/music";
 import generateLookupTable from "./../scripts/noteLTableGenerator";
 import Timeline from './Timeline';
 import ReactGridLayout from 'react-grid-layout';
+import "/node_modules/react-grid-layout/css/styles.css"
+import "/node_modules/react-resizable/css/styles.css"
 
 export default class WorkspaceComponent extends Component {
     state = {
@@ -191,9 +193,18 @@ export default class WorkspaceComponent extends Component {
 
     returnLayout = () => {
         return [
-            { i: "a", x: 0, y: 0, w: 1, h: 2, static: true },
-            { i: "b", x: 1, y: 0, w: 3, h: 2, minW: 2, maxW: 4 },
-            { i: "c", x: 4, y: 0, w: 1, h: 2 }
+            { i: "a", x: 0, y: 0, w: 1, h: 1, isResizable: false},
+            { i: "b", x: 0, y: 1, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "c", x: 0, y: 2, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "d", x: 0, y: 3, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "e", x: 0, y: 4, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "f", x: 0, y: 5, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "g", x: 0, y: 6, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "h", x: 0, y: 7, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "i", x: 0, y: 8, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "j", x: 0, y: 9, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "k", x: 0, y: 10, w: 1, h: 1, isDraggable: false, isResizable: false},
+            { i: "l", x: 0, y: 11, w: 1, h: 1, isDraggable: false, isResizable: false},
           ];
     }
 
@@ -209,12 +220,18 @@ export default class WorkspaceComponent extends Component {
             <div className="notes-wrapper">
                 <div className="notes-holder" id="nh">
                 <ReactGridLayout
-                    className="layout"
-                    layout={this.returnLayout}
-                    cols={12}
-                    rowHeight={30}
-                    width={100}
+                    className="grid-holder"
+                    layout={this.returnLayout()}
+                    cols={8}
+                    rowHeight={3.1875 * 16}
+                    width={5.5 * 16 * 8}
+                    containerPadding= {[0,0]}
+                    margin = {[0,0]}
                 >
+                    <div key="a" className='green'></div>
+                {Array.from({length: 11}, (_, i) => (
+                    <div key={String.fromCharCode(98 + i)} className='transparent'>hello</div>
+                ))}
                 </ReactGridLayout>
                 </div>
                 <div className='grid-canvas' id='gc'>
