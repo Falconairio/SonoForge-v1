@@ -157,11 +157,11 @@ export default class WorkspaceComponent extends Component {
     }
 
     calculateWidthsOfNotes = () => {
-        let remSize = 16
-        let remAmount = 5.5
+        const REM_AMOUNT = 5.5
+        let remSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
         let quantizationAmount = this.state.selectedTS[2]/this.state.selectedQZ
 
-        return (((remAmount * remSize) * quantizationAmount) * this.calculateNoCols())
+        return (((REM_AMOUNT * remSize) * quantizationAmount) * this.calculateNoCols())
     }
 
     dumpGrid = () => {
