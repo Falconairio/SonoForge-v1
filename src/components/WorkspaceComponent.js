@@ -23,7 +23,9 @@ export default class WorkspaceComponent extends Component {
         selectedQZ: 4,
         selectedTP: 60,
         lookupTable: null,
-        layout: []
+        layout: [],
+        noCols: 8,
+        noFour: 4
     }
 
     componentDidMount = () => {
@@ -33,7 +35,9 @@ export default class WorkspaceComponent extends Component {
             selectedTS: this.props.ts,
             selectedQZ: this.props.qz,
             selectedTP: this.props.tp,
-            lookupTable: generateLookupTable()
+            lookupTable: generateLookupTable(),
+            noCols: this.calculateNoCols(),
+            layout: this.returnLayout()
         }, () => {
             this.state.player.polySynth.volume._initialValue = 0.5
             this.state.player.bassSynth.volume._initialValue = 0.5
@@ -148,6 +152,18 @@ export default class WorkspaceComponent extends Component {
         return Math.ceil((this.state.currentSequence.totalTime / beatLengthInSeconds)/this.state.selectedTS[0])
     }
 
+    calculateNoCols = () => {
+        return this.state.selectedTS[0] * (this.state.selectedQZ/this.state.selectedTS[2]) * this.calculateNoBars()
+    }
+
+    calculateWidthsOfNotes = () => {
+        let remSize = 16
+        let remAmount = 5.5
+        let quantizationAmount = this.state.selectedTS[2]/this.state.selectedQZ
+
+        return (((remAmount * remSize) * quantizationAmount) * this.calculateNoCols())
+    }
+
     dumpGrid = () => {
         this.setState({
             layout: []
@@ -157,7 +173,6 @@ export default class WorkspaceComponent extends Component {
     }
 
     setupNotesOnGrid = () => {
-        console.log(this.state);
         let counter = 0
         this.state.currentSequence.notes.map((value,index) => {
             let fullNote = this.state.lookupTable[value.pitch]
@@ -182,8 +197,6 @@ export default class WorkspaceComponent extends Component {
                 minW: 1,
                 isResizable: false
             }
-
-            console.log(noteLayout);
 
             // let grid = document.getElementById('gh')
 
@@ -211,6 +224,14 @@ export default class WorkspaceComponent extends Component {
     setupGrid = () => {
         // this.dumpGrid()
         this.setupNotesOnGrid()
+    }
+
+    giveRowHeight = () => {
+        return 3.1875 * 16
+    }
+
+    returnFour = () => {
+        return this.state.noFour
     }
 
     // populateWhiteSpace = () => {
@@ -250,15 +271,16 @@ export default class WorkspaceComponent extends Component {
                 <ReactGridLayout
                     id = "gh"
                     className="grid-holder"
-                    layout={this.returnLayout()}
-                    cols={8}
-                    rowHeight={3.1875 * 16}
-                    width={ (11 * this.state.selectedTS[2]/this.state.selectedQZ) * 16 * (this.state.selectedTS[0] * this.calculateNoBars())}
+                    layout={this.state.layout}
+                    cols = {this.calculateNoCols()}
+                    rowHeight={this.giveRowHeight()}
+                    width={this.calculateWidthsOfNotes()}
                     containerPadding= {[0,0]}
                     margin = {[0,0]}
                     onLayoutChange={(layout) => {
                         this.setState({layout : layout})
                     }}
+                    
                 >
                     <div key="a" className='green'></div>
                 {Array.from({length: 11}, (_, i) => (
