@@ -22,7 +22,8 @@ export default class WorkspaceComponent extends Component {
         selectedTS: "4/4",
         selectedQZ: 4,
         selectedTP: 60,
-        lookupTable: null
+        lookupTable: null,
+        layout: []
     }
 
     componentDidMount = () => {
@@ -37,7 +38,7 @@ export default class WorkspaceComponent extends Component {
             this.state.player.polySynth.volume._initialValue = 0.5
             this.state.player.bassSynth.volume._initialValue = 0.5
             this.state.model.initialize();
-            this.setupGridAndNotes();
+            // this.setupGrid();
         })
     }
 
@@ -114,29 +115,29 @@ export default class WorkspaceComponent extends Component {
     noteToHeightAdjust = (note) => {
         switch(note) {
             case "C":
-                return 1;
+                return 0;
             case "C#":
-                return 2;
+                return 1;
             case "D":
-                return 3;
+                return 2;
             case "D#":
-                return 4;
+                return 3;
             case "E":
-                return 5;
+                return 4;
             case "F":
-                return 6;
+                return 5;
             case "F#":
-                return 7;
+                return 6;
             case "G":
-                return 8;
+                return 7;
             case "G#":
-                return 9;
+                return 8;
             case "A":
-                return 10;
+                return 9;
             case "A#":
-                return 11;
+                return 10;
             case "B":
-                return 12;
+                return 11;
             default:
                 return;
         }
@@ -144,56 +145,75 @@ export default class WorkspaceComponent extends Component {
 
     calculateNoBars = () => {
         let beatLengthInSeconds = 60/this.state.selectedTP
-        return (this.state.currentSequence.totalTime / beatLengthInSeconds)/this.state.selectedTS[0]
+        return Math.ceil((this.state.currentSequence.totalTime / beatLengthInSeconds)/this.state.selectedTS[0])
     }
 
-    setupGridAndNotes = () => {
-        let el = document.getElementById("nh")
-        let elHeight = el.getBoundingClientRect().height
-        let noteHeight =  elHeight / 12
+    dumpGrid = () => {
+        this.setState({
+            layout: []
+        })
+        let grid = document.getElementById('gh')
+        grid.innerHTML = ""
+    }
 
-        let noteHolder = document.getElementById("nh")
-        
-
+    setupNotesOnGrid = () => {
+        let counter = 0
         this.state.currentSequence.notes.map((value,index) => {
             let fullNote = this.state.lookupTable[value.pitch]
             let octave = parseInt(fullNote.charAt(fullNote.length - 1))
             let note = fullNote.slice(0,fullNote.length - 1)
+            let beatLengthInSeconds = 60/this.state.selectedTP
+            let st = value.startTime
+            let et = value.endTime
             let colorClass = this.octaveToColor(octave)
-            let heightAdjust = this.noteToHeightAdjust(note)
+            let rowToSet = this.noteToHeightAdjust(note)
 
-            // let wrapper = document.createElement("div")
-            // wrapper.className = "wrapper"
-            // let draggable = document.createElement("div")
-            // draggable.id = `drag${index}`
-            // draggable.classList.add("rect")
-            // draggable.classList.add(colorClass)
-            // // draggable.setAttribute("style", "transform: translate3d(50px, 0px, 0px)")
-            // wrapper.appendChild(draggable)
-            // noteHolder.appendChild(wrapper)
-           
+            let grid = document.getElementById('gh')
 
-            // let drag = Draggable.create(`#drag${index}`, {
-            //     type: "x,y",
-            //     bounds: ".notes-holder",
-            //     liveSnap: {
-            //         points: function (point) {
-            //             if(point.y % noteHeight !== 0) {
-            //                 point.y = Math.floor(point.y / noteHeight) * noteHeight
-            //             }
-            //             return point
-            //         },
-            //       },
-            //   });
-            // //   draggable.setAttribute("style", "transform: translate3d(50px, 0px, 0px)")
-            // //   draggable.setAttribute("style", `transform: translate3d(${index * 100}px, ${noteHeight * heightAdjust}px, 0px)`)
-            // wrapper.setAttribute("style", "margin-top: 100px")
+            let noteElement = document.createElement("div")
+            noteElement.key = `N${counter}`
+            noteElement.classList.add(colorClass)
+            grid.appendChild(noteElement)
+
+            let noteLayout = {
+                i: `N${counter}`,
+                x: st/beatLengthInSeconds,
+                y: rowToSet,
+                w: "",
+                h: 1,
+                minH: 1,
+                maxH: 1,
+                minW: 1,
+                isResizable: false
+            }
+
+            let layout = this.state.layout
+            layout.push(noteLayout)
+
+            this.setState({
+                layout: layout
+            })
+
+            counter++
+
+            return true
         })
     }
 
+    setupGrid = () => {
+        this.dumpGrid()
+        this.setupNotesOnGrid()
+    }
+
+    // populateWhiteSpace = () => {
+    //     for(let i = 0; i < this.calculateNoBars(); i++) {
+    //         for(let j = 0; )
+    //     }
+    // }
+
     returnLayout = () => {
         return [
-            { i: "a", x: 0, y: 6, w: 1, h: 1, isResizable: false},
+            { i: "a", x: 0, y: 6, w: 1, h: 1, minH: 1, maxH: 1, isResizable: true},
             { i: "b", x: 0, y: 1, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "c", x: 0, y: 2, w: 1, h: 1, isDraggable: false, isResizable: false},
             { i: "d", x: 0, y: 3, w: 1, h: 1, isDraggable: false, isResizable: false},
@@ -220,17 +240,21 @@ export default class WorkspaceComponent extends Component {
             <div className="notes-wrapper">
                 <div className="notes-holder" id="nh">
                 <ReactGridLayout
+                    id = "gh"
                     className="grid-holder"
                     layout={this.returnLayout()}
                     cols={8}
                     rowHeight={3.1875 * 16}
-                    width={5.5 * 16 * 8}
+                    width={5.5 * 16 * (this.state.selectedTS[0] * this.calculateNoBars())}
                     containerPadding= {[0,0]}
                     margin = {[0,0]}
+                    onLayoutChange={(layout) => {
+                        this.setState({layout : layout})
+                    }}
                 >
                     <div key="a" className='green'></div>
                 {Array.from({length: 11}, (_, i) => (
-                    <div key={String.fromCharCode(98 + i)} className='transparent'>hello</div>
+                    <div key={String.fromCharCode(98 + i)} className='transparent'></div>
                 ))}
                 </ReactGridLayout>
                 </div>

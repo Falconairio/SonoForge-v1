@@ -160,7 +160,6 @@ export default class RecognizerComponent extends Component {
             var startingTime = 0.0;
             var heldNote = "";
             var heldNoteOctave = 0
-            console.log("heldnote: " +heldNote);
         
             // Thanks to PitchDetect: https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
             var noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -175,8 +174,6 @@ export default class RecognizerComponent extends Component {
             var buffer = new Float32Array(bufferLength);
             analyser.getFloatTimeDomainData(buffer);
             var autoCorrelateValue = autoCorrelate(buffer, audioContext.sampleRate)
-            console.log("samplerate :" + audioContext.sampleRate);
-            console.log("note from pitch : " + noteFromPitch(autoCorrelateValue) % 12);
     
             var currentNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
             var currentOctave = octaveFromPitch(autoCorrelateValue);
@@ -186,7 +183,6 @@ export default class RecognizerComponent extends Component {
             let et = roundToNearest(audioContext.currentTime,noteLengthToRoundTo)
             //if there is no note detected on this loop
             if (autoCorrelateValue === -1) {
-                console.log(heldNote);
                 //and there was a note being held
                 if(heldNote.length > 0) {
                     //CHANGE THIS TO ROUND
@@ -225,7 +221,6 @@ export default class RecognizerComponent extends Component {
                         }
                     }
                     startingTime = audioContext.currentTime
-                    console.log("current: " + currentNote);
                     heldNote = currentNote
                     heldNoteOctave = currentOctave
                 } else {
