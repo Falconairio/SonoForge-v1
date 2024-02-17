@@ -38,7 +38,7 @@ export default class WorkspaceComponent extends Component {
             this.state.player.polySynth.volume._initialValue = 0.5
             this.state.player.bassSynth.volume._initialValue = 0.5
             this.state.model.initialize();
-            // this.setupGrid();
+            this.setupGrid();
         })
     }
 
@@ -157,29 +157,25 @@ export default class WorkspaceComponent extends Component {
     }
 
     setupNotesOnGrid = () => {
+        console.log(this.state);
         let counter = 0
         this.state.currentSequence.notes.map((value,index) => {
             let fullNote = this.state.lookupTable[value.pitch]
             let octave = parseInt(fullNote.charAt(fullNote.length - 1))
             let note = fullNote.slice(0,fullNote.length - 1)
             let beatLengthInSeconds = 60/this.state.selectedTP
+            let lengthOfBeat = 1/parseInt(this.state.selectedTS[2])
+            let beat = beatLengthInSeconds * lengthOfBeat
             let st = value.startTime
             let et = value.endTime
             let colorClass = this.octaveToColor(octave)
             let rowToSet = this.noteToHeightAdjust(note)
 
-            let grid = document.getElementById('gh')
-
-            let noteElement = document.createElement("div")
-            noteElement.key = `N${counter}`
-            noteElement.classList.add(colorClass)
-            grid.appendChild(noteElement)
-
             let noteLayout = {
                 i: `N${counter}`,
-                x: st/beatLengthInSeconds,
+                x: st/beat,
                 y: rowToSet,
-                w: "",
+                w: et/beat - st/beat,
                 h: 1,
                 minH: 1,
                 maxH: 1,
@@ -187,12 +183,24 @@ export default class WorkspaceComponent extends Component {
                 isResizable: false
             }
 
-            let layout = this.state.layout
-            layout.push(noteLayout)
+            console.log(noteLayout);
 
-            this.setState({
-                layout: layout
-            })
+            // let grid = document.getElementById('gh')
+
+            // let noteElement = document.createElement("div")
+            // noteElement.key = `N${counter}`
+            // noteElement.classList.add(colorClass)
+            // grid.appendChild(noteElement)
+
+
+            
+
+            // let layout = this.state.layout
+            // layout.push(noteLayout)
+
+            // this.setState({
+            //     layout: layout
+            // })
 
             counter++
 
@@ -201,7 +209,7 @@ export default class WorkspaceComponent extends Component {
     }
 
     setupGrid = () => {
-        this.dumpGrid()
+        // this.dumpGrid()
         this.setupNotesOnGrid()
     }
 
@@ -245,7 +253,7 @@ export default class WorkspaceComponent extends Component {
                     layout={this.returnLayout()}
                     cols={8}
                     rowHeight={3.1875 * 16}
-                    width={5.5 * 16 * (this.state.selectedTS[0] * this.calculateNoBars())}
+                    width={ (11 * this.state.selectedTS[2]/this.state.selectedQZ) * 16 * (this.state.selectedTS[0] * this.calculateNoBars())}
                     containerPadding= {[0,0]}
                     margin = {[0,0]}
                     onLayoutChange={(layout) => {
