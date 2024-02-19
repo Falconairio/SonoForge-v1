@@ -24,8 +24,7 @@ export default class WorkspaceComponent extends Component {
         selectedTP: 60,
         lookupTable: null,
         layout: [],
-        noCols: 8,
-        noFour: 4
+        notesToRender: []
     }
 
     componentDidMount = () => {
@@ -164,6 +163,17 @@ export default class WorkspaceComponent extends Component {
         return (((REM_AMOUNT * remSize) * quantizationAmount) * this.calculateNoCols())
     }
 
+    decideBeat = (noteTime) => {
+        let beatsInColumn = this.state.selectedQZ/this.state.selectedTS[2]
+        let beatsInBar = this.state.selectedTS[0]
+        let beatLengthInSeconds = 60/this.state.selectedTP
+        let secondsInBar = beatLengthInSeconds * beatsInBar
+        let smallestBeatLength = beatLengthInSeconds/beatsInColumn
+
+        return (Math.floor(noteTime/secondsInBar) * (beatsInColumn * beatsInBar)) +
+        (noteTime % secondsInBar)/smallestBeatLength
+    }
+
     dumpGrid = () => {
         this.setState({
             layout: []
@@ -174,23 +184,22 @@ export default class WorkspaceComponent extends Component {
 
     setupNotesOnGrid = () => {
         let counter = 0
+        let layout = this.state.layout
+        let renderedEls = this.state.notesToRender
         this.state.currentSequence.notes.map((value,index) => {
             let fullNote = this.state.lookupTable[value.pitch]
             let octave = parseInt(fullNote.charAt(fullNote.length - 1))
             let note = fullNote.slice(0,fullNote.length - 1)
-            let beatLengthInSeconds = 60/this.state.selectedTP
-            let lengthOfBeat = 1/parseInt(this.state.selectedTS[2])
-            let beat = beatLengthInSeconds * lengthOfBeat
-            let st = value.startTime
-            let et = value.endTime
+            let startBeat = this.decideBeat(value.startTime)
+            let endBeat = this.decideBeat(value.endTime)
             let colorClass = this.octaveToColor(octave)
             let rowToSet = this.noteToHeightAdjust(note)
 
             let noteLayout = {
                 i: `N${counter}`,
-                x: st/beat,
+                x: startBeat,
                 y: rowToSet,
-                w: et/beat - st/beat,
+                w: endBeat - startBeat,
                 h: 1,
                 minH: 1,
                 maxH: 1,
@@ -198,27 +207,25 @@ export default class WorkspaceComponent extends Component {
                 isResizable: false
             }
 
-            // let grid = document.getElementById('gh')
-
-            // let noteElement = document.createElement("div")
-            // noteElement.key = `N${counter}`
-            // noteElement.classList.add(colorClass)
-            // grid.appendChild(noteElement)
-
-
+            let noteObj = {
+                key: `N${counter}`,
+                class: colorClass
+            }
             
-
-            // let layout = this.state.layout
-            // layout.push(noteLayout)
-
-            // this.setState({
-            //     layout: layout
-            // })
+            layout.push(noteLayout)
+            renderedEls.push(noteObj)
 
             counter++
 
             return true
         })
+
+        this.setState({
+            layout: layout,
+            notesToRender: renderedEls
+        })
+
+        console.log(this.state);
     }
 
     setupGrid = () => {
@@ -269,7 +276,6 @@ export default class WorkspaceComponent extends Component {
             <div className="notes-wrapper">
                 <div className="notes-holder" id="nh">
                 <ReactGridLayout
-                    id = "gh"
                     className="grid-holder"
                     layout={this.state.layout}
                     cols = {this.calculateNoCols()}
@@ -280,12 +286,16 @@ export default class WorkspaceComponent extends Component {
                     onLayoutChange={(layout) => {
                         this.setState({layout : layout})
                     }}
-                    
                 >
                     <div key="a" className='green'></div>
                 {Array.from({length: 11}, (_, i) => (
                     <div key={String.fromCharCode(98 + i)} className='transparent'></div>
                 ))}
+                {
+                    this.state.notesToRender.map((element) => {
+                        return <div key={element.key} className={element.class}></div>
+                    })
+                }
                 </ReactGridLayout>
                 </div>
                 <div className='grid-canvas' id='gc'>
