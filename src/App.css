@@ -230,7 +230,8 @@ html, body, .App, #root {
   width: 70rem;
   height: 38.25rem;
   border-radius: 10px;
-  overflow: auto;
+  overflow-y: hidden;
+  overflow-x: auto;
   display: grid;
 }
 

@@ -10,9 +10,9 @@ export default class RecognizerComponent extends Component {
         isRecording : false,
         noteSequence: {
             notes: [
-                {pitch: 65, startTime: 1.0, endTime: 2.0},
+                {pitch: 65, startTime: 1.0, endTime: 2.0}
             ],
-            totalTime: 8
+            totalTime: 20
           },
         notes: [],
         seconds: 0,

@@ -24,7 +24,11 @@ export default class WorkspaceComponent extends Component {
         selectedTP: 60,
         lookupTable: null,
         layout: [],
-        notesToRender: []
+        notesToRender: [],
+        positionsFilled: {},
+        numberRows: 11,
+        numberColumns: 0,
+        hasFinishedCalculating: false
     }
 
     componentDidMount = () => {
@@ -35,13 +39,16 @@ export default class WorkspaceComponent extends Component {
             selectedQZ: this.props.qz,
             selectedTP: this.props.tp,
             lookupTable: generateLookupTable(),
-            noCols: this.calculateNoCols(),
-            layout: this.returnLayout()
         }, () => {
-            this.state.player.polySynth.volume._initialValue = 0.5
-            this.state.player.bassSynth.volume._initialValue = 0.5
-            this.state.model.initialize();
-            this.setupGrid();
+            this.setState({
+                numberColumns: this.calculateTotalCols(),
+            }, () => {
+                this.state.player.polySynth.volume._initialValue = 0.5
+                this.state.player.bassSynth.volume._initialValue = 0.5
+                this.state.model.initialize();
+                this.setupGrid();
+                console.log(this.calculateTotalCols() + " total cols");
+            })
         })
     }
 
@@ -151,8 +158,8 @@ export default class WorkspaceComponent extends Component {
         return Math.ceil((this.state.currentSequence.totalTime / beatLengthInSeconds)/this.state.selectedTS[0])
     }
 
-    calculateNoCols = () => {
-        return this.state.selectedTS[0] * (this.state.selectedQZ/this.state.selectedTS[2]) * this.calculateNoBars()
+    calculateTotalCols = () => {
+        return (this.state.selectedTS[0] * (this.state.selectedQZ/this.state.selectedTS[2])) * this.calculateNoBars()
     }
 
     calculateWidthsOfNotes = () => {
@@ -160,7 +167,7 @@ export default class WorkspaceComponent extends Component {
         let remSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
         let quantizationAmount = this.state.selectedTS[2]/this.state.selectedQZ
 
-        return (((REM_AMOUNT * remSize) * quantizationAmount) * this.calculateNoCols())
+        return (((REM_AMOUNT * remSize) * quantizationAmount) * this.calculateTotalCols())
     }
 
     decideBeat = (noteTime) => {
@@ -176,10 +183,10 @@ export default class WorkspaceComponent extends Component {
 
     dumpGrid = () => {
         this.setState({
-            layout: []
+            layout: [],
+            notesToRender: [],
+            positionsFilled: {}
         })
-        let grid = document.getElementById('gh')
-        grid.innerHTML = ""
     }
 
     setupNotesOnGrid = () => {
@@ -204,8 +211,10 @@ export default class WorkspaceComponent extends Component {
                 minH: 1,
                 maxH: 1,
                 minW: 1,
-                isResizable: false
+                isResizable: true
             }
+
+            this.registerPosition(startBeat,endBeat,rowToSet)
 
             let noteObj = {
                 key: `N${counter}`,
@@ -224,45 +233,68 @@ export default class WorkspaceComponent extends Component {
             layout: layout,
             notesToRender: renderedEls
         })
+    }
 
-        console.log(this.state);
+    populateWhiteSpace = () => {
+        let layout = this.state.layout
+        let wsLayout;
+        let renderedEls = this.state.notesToRender
+        let wsObj;
+        let posObj = this.state.positionsFilled
+        for(let i = 0; i < this.state.numberColumns; i++) {
+            for(let j = 0; j < this.state.numberRows; j++) {
+                if(!(`${i},${j}` in posObj)) {
+                    wsLayout = {
+                        i: `W${i},${j}`,
+                        x: i,
+                        y: j,
+                        w: 1,
+                        h: 1,
+                        minH: 1,
+                        maxH: 1,
+                        minW: 1,
+                        isResizable: false
+                    }
+
+                    wsObj = {
+                        key: `W${i},${j}`,
+                        class: "transparent"
+                    }
+
+                    layout.push(wsLayout)
+                    renderedEls.push(wsObj)
+                }
+            }
+        }
+
+        this.setState({
+            layout: layout,
+            notesToRender: renderedEls,
+            hasFinishedCalculating: true
+        })
     }
 
     setupGrid = () => {
-        // this.dumpGrid()
+        this.dumpGrid()
         this.setupNotesOnGrid()
+        this.populateWhiteSpace()
+        console.log(this.state);
     }
 
     giveRowHeight = () => {
         return 3.1875 * 16
     }
 
-    returnFour = () => {
-        return this.state.noFour
+    registerPosition = (x1,x2,y) => {
+        let posObj = this.state.positionsFilled
+        for(let i = x1; i < x2; i++) {
+            posObj[`${x1},${y}`] = true;  
+        } 
+        this.setState({
+            positionsFilled: posObj
+        })
     }
 
-    // populateWhiteSpace = () => {
-    //     for(let i = 0; i < this.calculateNoBars(); i++) {
-    //         for(let j = 0; )
-    //     }
-    // }
-
-    returnLayout = () => {
-        return [
-            { i: "a", x: 0, y: 6, w: 1, h: 1, minH: 1, maxH: 1, isResizable: true},
-            { i: "b", x: 0, y: 1, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "c", x: 0, y: 2, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "d", x: 0, y: 3, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "e", x: 0, y: 4, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "f", x: 0, y: 5, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "g", x: 0, y: 0, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "h", x: 0, y: 7, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "i", x: 0, y: 8, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "j", x: 0, y: 9, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "k", x: 0, y: 10, w: 1, h: 1, isDraggable: false, isResizable: false},
-            { i: "l", x: 0, y: 11, w: 1, h: 1, isDraggable: false, isResizable: false},
-          ];
-    }
 
   render() {
     return (
@@ -270,15 +302,17 @@ export default class WorkspaceComponent extends Component {
         <div className='notes-container'>
             <div className='notes-column'>{
             this.state.noteArr.map((el) => {
-                return <div>{el}</div>
+                return <div key = {el}>{el}</div>
             })
             }</div>
             <div className="notes-wrapper">
                 <div className="notes-holder" id="nh">
-                <ReactGridLayout
+                {
+                    this.state.hasFinishedCalculating ?
+                    <ReactGridLayout
                     className="grid-holder"
                     layout={this.state.layout}
-                    cols = {this.calculateNoCols()}
+                    cols = {this.calculateTotalCols()}
                     rowHeight={this.giveRowHeight()}
                     width={this.calculateWidthsOfNotes()}
                     containerPadding= {[0,0]}
@@ -287,16 +321,15 @@ export default class WorkspaceComponent extends Component {
                         this.setState({layout : layout})
                     }}
                 >
-                    <div key="a" className='green'></div>
-                {Array.from({length: 11}, (_, i) => (
-                    <div key={String.fromCharCode(98 + i)} className='transparent'></div>
-                ))}
                 {
                     this.state.notesToRender.map((element) => {
                         return <div key={element.key} className={element.class}></div>
                     })
                 }
                 </ReactGridLayout>
+                :
+                <div></div>
+                }
                 </div>
                 <div className='grid-canvas' id='gc'>
                     <Timeline 
