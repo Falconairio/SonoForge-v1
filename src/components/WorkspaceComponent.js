@@ -27,8 +27,10 @@ export default class WorkspaceComponent extends Component {
         notesToRender: [],
         positionsFilled: {},
         numberRows: 11,
+        rowHeight: 3.1875 * 16,
         numberColumns: 0,
-        hasFinishedCalculating: false
+        hasFinishedCalculating: false,
+        elementToNoteLookupTable: {}
     }
 
     componentDidMount = () => {
@@ -181,11 +183,18 @@ export default class WorkspaceComponent extends Component {
         (noteTime % secondsInBar)/smallestBeatLength
     }
 
+    /**
+     * A function that resets everything to do with the visual representation
+     * of this grid, including the position of the notes and whitespace.
+     * When finished it will set the finished flag to true so that the 
+     * workspace becomes usable.
+     */
     dumpGrid = () => {
         this.setState({
             layout: [],
             notesToRender: [],
-            positionsFilled: {}
+            positionsFilled: {},
+            hasFinishedCalculating: false
         })
     }
 
@@ -235,6 +244,16 @@ export default class WorkspaceComponent extends Component {
         })
     }
 
+    registerPosition = (x1,x2,y) => {
+        let posObj = this.state.positionsFilled
+        for(let i = x1; i < x2; i++) {
+            posObj[`${x1},${y}`] = true;  
+        } 
+        this.setState({
+            positionsFilled: posObj
+        })
+    }
+
     populateWhiteSpace = () => {
         let layout = this.state.layout
         let wsLayout;
@@ -278,21 +297,6 @@ export default class WorkspaceComponent extends Component {
         this.dumpGrid()
         this.setupNotesOnGrid()
         this.populateWhiteSpace()
-        console.log(this.state);
-    }
-
-    giveRowHeight = () => {
-        return 3.1875 * 16
-    }
-
-    registerPosition = (x1,x2,y) => {
-        let posObj = this.state.positionsFilled
-        for(let i = x1; i < x2; i++) {
-            posObj[`${x1},${y}`] = true;  
-        } 
-        this.setState({
-            positionsFilled: posObj
-        })
     }
 
 
@@ -313,7 +317,7 @@ export default class WorkspaceComponent extends Component {
                     className="grid-holder"
                     layout={this.state.layout}
                     cols = {this.calculateTotalCols()}
-                    rowHeight={this.giveRowHeight()}
+                    rowHeight={this.state.rowHeight}
                     width={this.calculateWidthsOfNotes()}
                     containerPadding= {[0,0]}
                     margin = {[0,0]}
@@ -338,6 +342,9 @@ export default class WorkspaceComponent extends Component {
                     />
                 </div>
             </div>
+        </div>
+        <div className="workspace-footer">
+            
         </div>
       </div>
     )

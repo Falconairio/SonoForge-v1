@@ -1,0 +1,125 @@
+.recognizer-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 80vw;
+    height: 70vh;
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.01);
+  }
+  
+  .options-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .recognizer-columns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 30rem;
+    margin-bottom: 1rem;
+  }
+  
+  .recognizer-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 100%;
+  }
+  
+  .recognizer-column-title {
+    text-align: center;
+    cursor: help;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .recognizer-column-title > select,input {
+    margin-top: 1.75rem;
+    margin-bottom: 1.75rem;
+  }
+  
+  .tooltip {
+    visibility: hidden;
+  }
+  
+  .tooltip {
+    visibility: hidden;
+    width: 15rem;
+    background-color: white;
+    color: black;
+    text-align: center;
+    padding: 0.5rem 0.2rem;
+    border-radius: 6px;
+    top: -5px;
+    right: 105%;
+    font-style: italic;
+    font-size: 1rem;
+   
+    position: absolute;
+    z-index: 1;
+  }
+  
+  .tooltip::after {
+    content: " ";
+    position: absolute;
+    
+    left: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent white;
+  }
+  
+  .tooltip:nth-child(1)::after {
+    top: 10%;
+  }
+  
+  .tooltip:nth-child(2)::after {
+    top: 50%;
+  }
+  
+  .recognizer-column-title:hover .tooltip {
+    visibility: visible;
+  }
+  
+  .current-note {
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+  
+  .current-note > h2:first-child {
+    width: 15rem;
+  }
+  
+  #note {
+    width: 5rem;
+  }
+  
+  .finish-recording-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 300px;
+    height: 300px;
+  }
+  
+  .recording-page-button {
+    width: 10rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    background-color: transparent;
+    border: 2px solid white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Cabin', sans-serif;
+    color: white
+  }

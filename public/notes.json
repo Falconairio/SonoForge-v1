@@ -1,0 +1,45 @@
+{
+    "languages": [
+        {
+            "name": "English",
+            "notes": [
+                { "note": "C", "name": "C" },
+                { "note": "C#", "name": "C#" },
+                { "note": "D", "name": "D" },
+                { "note": "D#", "name": "D#" },
+                { "note": "E", "name": "E" },
+                { "note": "F", "name": "F" },
+                { "note": "F#", "name": "F#" },
+                { "note": "G", "name": "G" },
+                { "note": "G#", "name": "G#" },
+                { "note": "A", "name": "A" },
+                { "note": "A#", "name": "A#" },
+                { "note": "B", "name": "B" }
+            ]
+        },
+        {
+            "name": "Spanish",
+            "notes": [
+                { "note": "C", "name": "Do" },
+                { "note": "D", "name": "Re" },
+                { "note": "E", "name": "Mi" },
+                { "note": "F", "name": "Fa" },
+                { "note": "G", "name": "Sol" },
+                { "note": "A", "name": "La" },
+                { "note": "B", "name": "Si" }
+            ]
+        },
+        {
+            "name": "French",
+            "notes": [
+                { "note": "C", "name": "Do" },
+                { "note": "D", "name": "Ré" },
+                { "note": "E", "name": "Mi" },
+                { "note": "F", "name": "Fa" },
+                { "note": "G", "name": "Sol" },
+                { "note": "A", "name": "La" },
+                { "note": "B", "name": "Si" }
+            ]
+        }
+    ]
+}

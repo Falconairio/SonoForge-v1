@@ -2,7 +2,7 @@ html, body, .App, #root {
   width: 100%;
   height: 100%;
   background-color: #000000;
-  font-family: 'Cabin', sans-serif;
+  font-family: "Cabin", sans-serif;
   color: white;
 }
 
@@ -40,7 +40,6 @@ html, body, .App, #root {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  
   width: 100%;
 }
 
@@ -114,7 +113,7 @@ html, body, .App, #root {
   display: inline-block;
 }
 
-.recognizer-column-title > select,input {
+.recognizer-column-title > select, input {
   margin-top: 1.75rem;
   margin-bottom: 1.75rem;
 }
@@ -123,7 +122,6 @@ html, body, .App, #root {
   visibility: hidden;
 }
 
-/* Tooltip text */
 .tooltip {
   visibility: hidden;
   width: 15rem;
@@ -136,8 +134,6 @@ html, body, .App, #root {
   right: 105%;
   font-style: italic;
   font-size: 1rem;
- 
-  /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 1;
 }
@@ -145,8 +141,7 @@ html, body, .App, #root {
 .tooltip::after {
   content: " ";
   position: absolute;
-  
-  left: 100%; /* To the right of the tooltip */
+  left: 100%;
   margin-top: -5px;
   border-width: 5px;
   border-style: solid;
@@ -196,8 +191,8 @@ html, body, .App, #root {
   font-size: 20px;
   font-weight: bold;
   cursor: pointer;
-  font-family: 'Cabin', sans-serif;
-  color: white
+  font-family: "Cabin", sans-serif;
+  color: white;
 }
 
 .workspace-container {
@@ -331,4 +326,4 @@ html, body, .App, #root {
 
 .brown {
   background-color: brown;
-}
+}/*# sourceMappingURL=App.css.map */

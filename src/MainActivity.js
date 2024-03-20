@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import RecognizerComponent from './components/RecognizerComponent';
 import WorkspaceComponent from './components/WorkspaceComponent';
 import NotationComponent from './components/NotationComponent';
-import { Link } from 'react-router-dom';
 
 class MainActivity extends Component {
     state = {
