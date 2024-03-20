@@ -333,6 +333,15 @@ html, body, .App, #root {
   background-color: brown;
 }
 
+.transparent {
+  background-color: transparent;
+}
+
+.selected {
+  border: 0.2rem solid black;
+  box-sizing: border-box;
+}
+
 .workspace-footer {
   position: fixed;
   left: 0;
@@ -353,7 +362,7 @@ html, body, .App, #root {
   box-shadow: 0 0.3rem 1rem rgba(0, 0, 0, 0.3);
 }
 .workspace-page-button:active {
-  transform: translateY(4px);
+  transform: translateY(0.25rem);
   box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1);
 }
 

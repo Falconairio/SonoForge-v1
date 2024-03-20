@@ -31,7 +31,9 @@ export default class WorkspaceComponent extends Component {
         numberColumns: 0,
         hasFinishedCalculating: false,
         elementToNoteLookupTable: {},
-        noteSelected: false
+        noteSelected: false,
+        whiteSpaceSelected: false,
+        selectedElement: ""
     }
 
     componentDidMount = () => {
@@ -50,9 +52,25 @@ export default class WorkspaceComponent extends Component {
                 this.state.player.bassSynth.volume._initialValue = 0.5
                 this.state.model.initialize();
                 this.setupGrid();
-                console.log(this.calculateTotalCols() + " total cols");
+                document.addEventListener('mousedown', this.handleClickOutside);
             })
         })
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('mousedown', this.handleClickOutside);
+    }
+
+    handleClickOutside = (event) => {
+        let workspace = document.getElementById("nh");
+        let toolbar = document.getElementById("wf")
+        if (workspace && toolbar && !workspace.contains(event.target) 
+        && !toolbar.contains(event.target)) {
+            this.setState({
+              whiteSpaceSelected: false,
+              selectedElement: ""
+            });
+          }
     }
 
     playUpdatedSequence = () => {
@@ -264,8 +282,9 @@ export default class WorkspaceComponent extends Component {
         for(let i = 0; i < this.state.numberColumns; i++) {
             for(let j = 0; j < this.state.numberRows; j++) {
                 if(!(`${i},${j}` in posObj)) {
+                    let elementKey = `W${i},${j}`;
                     wsLayout = {
-                        i: `W${i},${j}`,
+                        i: elementKey,
                         x: i,
                         y: j,
                         w: 1,
@@ -278,8 +297,16 @@ export default class WorkspaceComponent extends Component {
                     }
 
                     wsObj = {
-                        key: `W${i},${j}`,
-                        class: "transparent"
+                        key: elementKey,
+                        class:
+                            this.state.selectedWhiteSpace === elementKey ? "transparent selected" : "transparent"
+                        ,
+                        onclick: () => {
+                            this.setState({
+                                whiteSpaceSelected: true,
+                                selectedElement: elementKey
+                            })
+                        }
                     }
 
                     layout.push(wsLayout)
@@ -329,7 +356,11 @@ export default class WorkspaceComponent extends Component {
                 >
                 {
                     this.state.notesToRender.map((element) => {
-                        return <div key={element.key} className={element.class}></div>
+                        let className = element.class;
+                        if(this.state.selectedElement === element.key) {
+                            className += " selected"
+                        }
+                        return <div key={element.key} className={className} onClick={element.onclick}></div>
                     })
                 }
                 </ReactGridLayout>
@@ -345,10 +376,10 @@ export default class WorkspaceComponent extends Component {
                 </div>
             </div>
         </div>
-        <div className="workspace-footer flexrow">
+        <div className="workspace-footer flexrow" id = "wf">
             <button className='workspace-page-button active'>Rerecord</button>
             <button className='workspace-page-button active'>Generate Continuation</button>
-            <button className={this.state.noteSelected ? "workspace-page-button active" 
+            <button className={this.state.whiteSpaceSelected ? "workspace-page-button active" 
             : " workspace-page-button inactive"}>Add Note</button>
             <button className={this.state.noteSelected ? "workspace-page-button active" 
             : " workspace-page-button inactive"}>Edit Note</button>

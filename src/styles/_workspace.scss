@@ -131,6 +131,15 @@
     background-color: brown;
 }
 
+.transparent {
+    background-color: transparent;
+}
+
+.selected {
+    border: 0.2rem solid black;
+    box-sizing: border-box;
+}
+
 .workspace-footer {
     position: fixed;
     left: 0;
@@ -147,12 +156,12 @@
     border: 0.2rem solid black;
     font-family: $font-family;
     font-weight: bold;
-    transition: box-shadow 0.1s ease, transform 0.1s ease; // Add transition
-    box-shadow: 0 0.3rem 1rem rgba(0, 0, 0, 0.3); // Add box shadow
+    transition: box-shadow 0.1s ease, transform 0.1s ease;
+    box-shadow: 0 0.3rem 1rem rgba(0, 0, 0, 0.3);
 
     &:active {
-        transform: translateY(4px); // Move button down when active
-        box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1); // Reduce box shadow when active
+        transform: translateY(0.25rem); 
+        box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1);
       }
 }
 
