@@ -35,7 +35,7 @@ export default class WorkspaceComponent extends Component {
         whiteSpaceSelected: false,
         selectedElement: "",
         isMenuOpen: false,
-        specificMenuOpen: 0
+        specificMenuOpen: 0,
     }
 
     componentDidMount = () => {
@@ -417,8 +417,20 @@ export default class WorkspaceComponent extends Component {
                     })}
                 }>Generate Continuation</button>
                 {this.state.isMenuOpen && this.state.specificMenuOpen === 2 && (
-                    <div className="workspace-button-menu">
-                        <h1>Hello</h1>
+                    <div className="workspace-button-menu generator">
+                        <div className = "workspace-button-menu-sub">
+                            <label for="temperature">Randomness: {this.state.temperature}</label>
+                            <input type = "range" id = "temperature" name = "temp" 
+                            value = {this.state.temperature} min = "0.0" max = "1.5" step="0.05" 
+                            onChange={(event) => {
+                                this.setState({temperature: event.target.value})
+                            }}></input>
+                        </div>
+                        <div className='workspace-button-menu-sub'>
+                            <label for="steps">Steps:</label>
+                            <input id = "steps"></input>
+                        </div>
+                        <button className='workspace-sub-button active'>Generate</button>
                     </div>
             )}
             </div>

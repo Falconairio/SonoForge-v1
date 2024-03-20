@@ -118,7 +118,7 @@ html, body, .App, #root {
   display: inline-block;
 }
 
-.recognizer-column-title > select, input {
+.recognizer-column-title > select, .recognizer-column-title > input {
   margin-top: 1.75rem;
   margin-bottom: 1.75rem;
 }
@@ -388,8 +388,12 @@ html, body, .App, #root {
   transform: translateX(-50%);
   background-color: whitesmoke;
   color: black;
-  padding: 0 1rem;
+  padding: 1rem 1rem;
   margin-bottom: 1rem;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
 }
 .workspace-button-menu::before {
   content: "";
@@ -400,4 +404,22 @@ html, body, .App, #root {
   border-width: 0.5rem;
   border-style: solid;
   border-color: whitesmoke transparent transparent transparent;
+}
+.workspace-button-menu-sub {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.generator {
+  height: 10rem;
+}
+
+.workspace-sub-button {
+  font-size: 0.9rem;
+  background-color: white;
+  color: black;
+  font-family: "Cabin", sans-serif;
+  border: 0.2rem solid black;
+  font-weight: bold;
 }/*# sourceMappingURL=App.css.map */

@@ -149,6 +149,9 @@
     height: 4rem;
     border-top-left-radius: 1.5rem;
     border-top-right-radius: 2rem;
+    // border-left: 0.2rem solid brown;
+    // border-right: 0.2rem solid brown;
+    // border-top: 0.2rem solid brown;
     z-index: 3;
 }
 
@@ -187,8 +190,12 @@
     transform: translateX(-50%);
     background-color: whitesmoke;
     color: black;
-    padding: 0 1rem;
+    padding: 1rem 1rem;
     margin-bottom: 1rem;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
 
     &::before {
         content: "";
@@ -200,4 +207,25 @@
         border-style: solid;
         border-color: whitesmoke transparent transparent transparent;
     }
+
+    &-sub {
+        display: flex;
+        flex-direction: column;
+        // justify-content: space-evenly;
+        align-items: start;
+    
+    }
+}
+
+.generator {
+    height: 10rem;
+}
+
+.workspace-sub-button {
+    font-size: 0.9rem;
+    background-color: white;
+    color: black;
+    font-family: $font-family;
+    border: 0.2rem solid black;
+    font-weight: bold;
 }
