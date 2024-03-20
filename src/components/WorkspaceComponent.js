@@ -68,6 +68,7 @@ export default class WorkspaceComponent extends Component {
         && !toolbar.contains(event.target)) {
             this.setState({
               whiteSpaceSelected: false,
+              noteSelected: false,
               selectedElement: ""
             });
           }
@@ -230,8 +231,10 @@ export default class WorkspaceComponent extends Component {
             let colorClass = this.octaveToColor(octave)
             let rowToSet = this.noteToHeightAdjust(note)
 
+            let elementKey = `N${counter}`;
+
             let noteLayout = {
-                i: `N${counter}`,
+                i: elementKey,
                 x: startBeat,
                 y: rowToSet,
                 w: endBeat - startBeat,
@@ -245,8 +248,15 @@ export default class WorkspaceComponent extends Component {
             this.registerPosition(startBeat,endBeat,rowToSet)
 
             let noteObj = {
-                key: `N${counter}`,
-                class: colorClass
+                key: elementKey,
+                class: colorClass,
+                onclick: () => {
+                    this.setState({
+                        noteSelected: true,
+                        whiteSpaceSelected: false,
+                        selectedElement: elementKey,
+                    })
+                }
             }
             
             layout.push(noteLayout)
@@ -303,6 +313,7 @@ export default class WorkspaceComponent extends Component {
                         ,
                         onclick: () => {
                             this.setState({
+                                noteSelected: false,
                                 whiteSpaceSelected: true,
                                 selectedElement: elementKey
                             })
