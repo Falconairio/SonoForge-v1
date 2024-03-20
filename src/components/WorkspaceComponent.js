@@ -33,7 +33,9 @@ export default class WorkspaceComponent extends Component {
         elementToNoteLookupTable: {},
         noteSelected: false,
         whiteSpaceSelected: false,
-        selectedElement: ""
+        selectedElement: "",
+        isMenuOpen: false,
+        specificMenuOpen: 0
     }
 
     componentDidMount = () => {
@@ -69,6 +71,8 @@ export default class WorkspaceComponent extends Component {
             this.setState({
               whiteSpaceSelected: false,
               noteSelected: false,
+              isMenuOpen: false,
+              specificMenuOpen: 0,
               selectedElement: ""
             });
           }
@@ -254,6 +258,7 @@ export default class WorkspaceComponent extends Component {
                     this.setState({
                         noteSelected: true,
                         whiteSpaceSelected: false,
+                        isMenuOpen: false,
                         selectedElement: elementKey,
                     })
                 }
@@ -315,6 +320,7 @@ export default class WorkspaceComponent extends Component {
                             this.setState({
                                 noteSelected: false,
                                 whiteSpaceSelected: true,
+                                isMenuOpen: false,
                                 selectedElement: elementKey
                             })
                         }
@@ -388,13 +394,83 @@ export default class WorkspaceComponent extends Component {
             </div>
         </div>
         <div className="workspace-footer flexrow" id = "wf">
-            <button className='workspace-page-button active'>Rerecord</button>
-            <button className='workspace-page-button active'>Generate Continuation</button>
+            <div className="button-container">
+                <button className='workspace-page-button active'
+                onClick= {() => {
+                    this.setState({
+                        isMenuOpen : true,
+                        specificMenuOpen : 1
+                    })}
+                }>Rerecord</button>
+                {this.state.isMenuOpen && this.state.specificMenuOpen === 1 && (
+                    <div className="workspace-button-menu">
+                        <h1>Are you sure?</h1>
+                    </div>
+            )}
+            </div>
+            <div className="button-container">
+                <button className='workspace-page-button active'
+                onClick= {() => {
+                    this.setState({
+                        isMenuOpen : true,
+                        specificMenuOpen : 2
+                    })}
+                }>Generate Continuation</button>
+                {this.state.isMenuOpen && this.state.specificMenuOpen === 2 && (
+                    <div className="workspace-button-menu">
+                        <h1>Hello</h1>
+                    </div>
+            )}
+            </div>
+            <div className="button-container">
             <button className={this.state.whiteSpaceSelected ? "workspace-page-button active" 
-            : " workspace-page-button inactive"}>Add Note</button>
+            : " workspace-page-button inactive"}
+            onClick = {() => {
+                if(this.state.whiteSpaceSelected) {
+                    this.setState({
+                        isMenuOpen : true,
+                        specificMenuOpen : 3
+                    })}
+                }
+            }>Add Note</button>
+                {this.state.isMenuOpen && this.state.specificMenuOpen === 3 && (
+                    <div className="workspace-button-menu">
+                        <h1>Adding Note!</h1>
+                    </div>
+            )}
+            </div>
+            <div className="button-container">
             <button className={this.state.noteSelected ? "workspace-page-button active" 
-            : " workspace-page-button inactive"}>Edit Note</button>
-            <button className='workspace-page-button active'>Finish</button>
+            : " workspace-page-button inactive"}
+            onClick = {() => {
+                if(this.state.noteSelected) {
+                    this.setState({
+                        isMenuOpen : true,
+                        specificMenuOpen : 4
+                    })}
+                }
+            }>Edit Note</button>
+                {this.state.isMenuOpen && this.state.specificMenuOpen === 4 && (
+                    <div className="workspace-button-menu">
+                        <h1>Editing Note!</h1>
+                    </div>
+            )}
+            </div>
+
+            <div className="button-container">
+                <button className='workspace-page-button active'
+                onClick= {() => {
+                    this.setState({
+                        isMenuOpen : true,
+                        specificMenuOpen : 5
+                    })}
+                }>Finish</button>
+                {this.state.isMenuOpen && this.state.specificMenuOpen === 5 && (
+                    <div className="workspace-button-menu">
+                        <h1>Done Composing?</h1>
+                    </div>
+            )}
+            </div>
         </div>
       </div>
     )

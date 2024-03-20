@@ -149,6 +149,7 @@
     height: 4rem;
     border-top-left-radius: 1.5rem;
     border-top-right-radius: 2rem;
+    z-index: 3;
 }
 
 .workspace-page-button {
@@ -173,4 +174,30 @@
     background-color: rgba(128, 128, 128, 0.376);
     color:rgba(0, 0, 0, 0.405);
     border-color: rgba(0, 0, 0, 0.525);
+}
+
+.button-container {
+    position: relative;
+}
+
+.workspace-button-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: whitesmoke;
+    color: black;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 0.5rem;
+        border-style: solid;
+        border-color: whitesmoke transparent transparent transparent;
+    }
 }
