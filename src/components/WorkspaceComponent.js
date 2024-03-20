@@ -30,7 +30,8 @@ export default class WorkspaceComponent extends Component {
         rowHeight: 3.1875 * 16,
         numberColumns: 0,
         hasFinishedCalculating: false,
-        elementToNoteLookupTable: {}
+        elementToNoteLookupTable: {},
+        noteSelected: false
     }
 
     componentDidMount = () => {
@@ -272,7 +273,8 @@ export default class WorkspaceComponent extends Component {
                         minH: 1,
                         maxH: 1,
                         minW: 1,
-                        isResizable: false
+                        isResizable: false,
+                        isDraggable: false
                     }
 
                     wsObj = {
@@ -302,7 +304,7 @@ export default class WorkspaceComponent extends Component {
 
   render() {
     return (
-      <div className='workspace-container'>
+      <div className='workspace-container flexcolumn'>
         <div className='notes-container'>
             <div className='notes-column'>{
             this.state.noteArr.map((el) => {
@@ -343,8 +345,14 @@ export default class WorkspaceComponent extends Component {
                 </div>
             </div>
         </div>
-        <div className="workspace-footer">
-            
+        <div className="workspace-footer flexrow">
+            <button className='workspace-page-button active'>Rerecord</button>
+            <button className='workspace-page-button active'>Generate Continuation</button>
+            <button className={this.state.noteSelected ? "workspace-page-button active" 
+            : " workspace-page-button inactive"}>Add Note</button>
+            <button className={this.state.noteSelected ? "workspace-page-button active" 
+            : " workspace-page-button inactive"}>Edit Note</button>
+            <button className='workspace-page-button active'>Finish</button>
         </div>
       </div>
     )

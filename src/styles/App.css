@@ -20,6 +20,11 @@ html, body, .App, #root {
   align-items: center;
 }
 
+.flexcolumn {
+  display: flex;
+  flex-direction: column;
+}
+
 .home-blurb {
   max-width: 40rem;
 }
@@ -326,4 +331,38 @@ html, body, .App, #root {
 
 .brown {
   background-color: brown;
+}
+
+.workspace-footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: bisque;
+  height: 4rem;
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 2rem;
+}
+
+.workspace-page-button {
+  font-size: 1.5rem;
+  border: 0.2rem solid black;
+  font-family: "Cabin", sans-serif;
+  font-weight: bold;
+  transition: box-shadow 0.1s ease, transform 0.1s ease;
+  box-shadow: 0 0.3rem 1rem rgba(0, 0, 0, 0.3);
+}
+.workspace-page-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1);
+}
+
+.active {
+  background-color: white;
+}
+
+.inactive {
+  background-color: rgba(128, 128, 128, 0.376);
+  color: rgba(0, 0, 0, 0.405);
+  border-color: rgba(0, 0, 0, 0.525);
 }/*# sourceMappingURL=App.css.map */
