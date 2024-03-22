@@ -10,14 +10,15 @@ export default class WorkspaceComponent extends Component {
     state = {
         player : null,
         model : new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn'),
-        temperature : 0.0,
+        temperature : 0.5,
         steps: 16,
         currentSequence: {
             notes: [
             ],
             totalTime: 0
         },
-        changedSequence: null,
+        generatedSequence: null,
+        generating: false,
         noteArr : ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
         selectedTS: "4/4",
         selectedQZ: 4,
@@ -26,7 +27,7 @@ export default class WorkspaceComponent extends Component {
         layout: [],
         notesToRender: [],
         positionsFilled: {},
-        numberRows: 11,
+        numberRows: 12,
         rowHeight: 3.1875 * 16,
         numberColumns: 0,
         hasFinishedCalculating: false,
@@ -78,44 +79,45 @@ export default class WorkspaceComponent extends Component {
           }
     }
 
-    playUpdatedSequence = () => {
-        let origNotes = this.state.noteSequence.notes
-        let qNotes = sequences.quantizeNoteSequence(origNotes,4)
-        let origTime = this.state.noteSequence.totalTime
-        let extraNotes = this.state.changedSequence.notes
-        let extraTime = this.state.changedSequence.totalTime
-
-        let newNS = {
-            notes: [
-                qNotes.notes.concat(extraNotes)
-            ],
-            totalTime: 20
-        }
-
-        if (this.state.player.isPlaying()) {  
-            this.state.player.stop();
-            return;
-          }
-        this.state.player.start(newNS)
-    }
-
-    testFunc = () => {
+    generateSequence = () => {
         if (this.state.player.isPlaying()) {  
             this.state.player.stop();
             return;
           }
         
-        let notes = sequences.quantizeNoteSequence(this.state.noteSequence, 4);
+        this.setState({
+            generating: true
+        }, () => {
+            console.log(4/this.state.selectedQZ);
+            let notes = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
+            console.log(notes);
+            this.state.model
+            .continueSequence(notes, this.state.steps, this.state.temperature)
+            .then((sample) => {
+                console.log(sample);
+                if(sample.notes.length > 0) {
+                    this.setState({
+                        generatedSequence : sample,
+                        generating: false
+                    })
+                }
+            }).catch( (err) => console.log(err))
+        })
+    }
+    playSequence = (sequence ) => {
+        if (this.state.player.isPlaying() || this.state.currentSequence.totalTime === 0) {  
+            this.state.player.stop();
+            return;
+          }
+        this.state.player.start(this.state.currentSequence)
+    }
 
-        this.state.model
-        .continueSequence(notes, this.state.steps,this.state.temperature)
-        .then((sample) => {
-            if(sample.notes.length > 0) {
-                this.setState({
-                    changedSequence : sample
-                })
-            }
-        }).catch( (err) => console.log(err))
+    playGeneration = () => {
+        if (this.state.player.isPlaying() || this.state.generatedSequence == null) {  
+            this.state.player.stop();
+            return;
+          }
+        this.state.player.start(this.state.generatedSequence)
     }
 
     noteFromPitch = (pitch) => {
@@ -417,20 +419,41 @@ export default class WorkspaceComponent extends Component {
                     })}
                 }>Generate Continuation</button>
                 {this.state.isMenuOpen && this.state.specificMenuOpen === 2 && (
-                    <div className="workspace-button-menu generator">
-                        <div className = "workspace-button-menu-sub">
-                            <label for="temperature">Randomness: {this.state.temperature}</label>
-                            <input type = "range" id = "temperature" name = "temp" 
-                            value = {this.state.temperature} min = "0.0" max = "1.5" step="0.05" 
-                            onChange={(event) => {
-                                this.setState({temperature: event.target.value})
-                            }}></input>
+                    <div className="workspace-button-menu" id = "generator">
+                        <div className='flexcolumn' id = "generator-inputs">
+                            <div className = "workspace-button-menu-sub">
+                                <label>
+                                    Randomness: {(Math.ceil((this.state.temperature/1.5) * 100))}%
+                                </label>
+                                <input type = "range" id = "temperature" name = "temp" 
+                                value = {this.state.temperature} min = "0.0" max = "1.5" step="0.05" 
+                                onChange={(event) => {
+                                    this.setState({temperature: parseFloat(event.target.value)})
+                                }}></input>
+                            </div>
+                            <div className='workspace-button-menu-sub'>
+                                <label id = "steps">Steps:</label>
+                                <input id = "steps" type='number'></input>
+                            </div>
                         </div>
-                        <div className='workspace-button-menu-sub'>
-                            <label for="steps">Steps:</label>
-                            <input id = "steps"></input>
+                        <div className='flexcolumn' id = "generator-buttons">
+                            <button className='workspace-sub-button active activeclick'
+                            onClick = {this.generateSequence}>
+                            {
+                                this.state.generating ? "Loading..." :
+                                this.state.generatedSequence != null ? "Regenerate" : "Generate"
+                            }
+                            </button>
+                            <button className={this.state.generatedSequence != null 
+                            ? 'workspace-sub-button active activeclick'
+                            : 'workspace-sub-button inactive inactiveclick'}
+                            onClick = { () => {
+                                    if(this.state.generatedSequence !== null) {
+                                        this.playGeneration()
+                                    }
+                                }}>Listen</button>
+                            <button className='workspace-sub-button inactive inactiveclick'>Place</button>
                         </div>
-                        <button className='workspace-sub-button active'>Generate</button>
                     </div>
             )}
             </div>

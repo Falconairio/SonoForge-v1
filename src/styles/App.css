@@ -351,6 +351,7 @@ html, body, .App, #root {
   height: 4rem;
   border-top-left-radius: 1.5rem;
   border-top-right-radius: 2rem;
+  box-shadow: 0 -0.2rem 1rem rgba(153, 124, 89, 0.908);
   z-index: 3;
 }
 
@@ -366,15 +367,19 @@ html, body, .App, #root {
   transform: translateY(0.25rem);
   box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1);
 }
+.workspace-page-button:hover {
+  cursor: pointer;
+}
 
 .active {
+  border: 0.2rem solid black;
   background-color: white;
 }
 
 .inactive {
   background-color: rgba(128, 128, 128, 0.376);
   color: rgba(0, 0, 0, 0.405);
-  border-color: rgba(0, 0, 0, 0.525);
+  border: 0.2rem solid rgba(0, 0, 0, 0.525);
 }
 
 .button-container {
@@ -394,15 +399,22 @@ html, body, .App, #root {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
+  border: 1px solid black;
 }
-.workspace-button-menu::before {
+.workspace-button-menu::before, .workspace-button-menu::after {
   content: "";
   position: absolute;
-  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   border-width: 0.5rem;
   border-style: solid;
+}
+.workspace-button-menu::before {
+  top: 100%;
+  border-color: black transparent transparent transparent;
+}
+.workspace-button-menu::after {
+  top: calc(100% - 1px);
   border-color: whitesmoke transparent transparent transparent;
 }
 .workspace-button-menu-sub {
@@ -411,15 +423,36 @@ html, body, .App, #root {
   align-items: start;
 }
 
-.generator {
-  height: 10rem;
+#generator {
+  height: 7rem;
+  width: 23rem;
+  padding: 0.75rem 0.75rem;
+  flex-direction: row;
+}
+#generator-buttons {
+  justify-content: space-evenly;
+  width: 7rem;
+}
+#generator-inputs {
+  justify-content: center;
+}
+
+#steps {
+  margin-bottom: 0.2rem;
+  margin-top: 0.2rem;
 }
 
 .workspace-sub-button {
   font-size: 0.9rem;
-  background-color: white;
-  color: black;
   font-family: "Cabin", sans-serif;
-  border: 0.2rem solid black;
   font-weight: bold;
+  cursor: pointer;
+}
+
+.activeclick:active {
+  background-color: rgb(105, 204, 131);
+}
+
+.inactiveclick:active {
+  background-color: rgb(247, 160, 150);
 }/*# sourceMappingURL=App.css.map */
