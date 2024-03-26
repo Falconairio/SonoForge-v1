@@ -269,8 +269,8 @@ export default class RecognizerComponent extends Component {
             ? 
             <div className='options-box'>
 
-            <div className="recognizer-columns">
-                <div className="recognizer-column">
+            <div className="recognizer-rows">
+                <div className='recognizer-row'>
                     <h2 className="recognizer-column-title">
                         Quantization:
                         <span className='tooltip tt1'>
@@ -282,27 +282,6 @@ export default class RecognizerComponent extends Component {
                         up as different notes.
                         </span>
                     </h2>
-                    <h2 className="recognizer-column-title">
-                        Tempo/BPM:
-                        <span className='tooltip tt2'>
-                        The Tempo, or more simply the Beats Per Minute, is the number of single
-                        beats that come within one minute of music. What you select for this will
-                        work in conjunction with the time signature to generate the correct
-                        representation for your recorded music.
-                        </span>
-                    </h2>
-                    <h2 className="recognizer-column-title">
-                        Time Signature:
-                        <span className='tooltip tt3'>
-                        The Time Signature signifies which type of note makes up a beat, as well
-                        as how many beats exist in a bar. The number on the left denotes the latter
-                        and the number on the right denotes the former. For example, a time signature
-                        of 4/4 means that 4 notes a quarter in length make up a bar. Likewise, a time
-                        signature of 2/4 means that a bar holds 2 notes a quarter in length.
-                        </span>
-                    </h2>
-                </div>
-                <div className="recognizer-column">
                     <select name="quantization" id="qz" onChange={
                         (event) => {this.setState({"selectedQZ": parseInt(event.target.value)})}
                             }defaultValue={this.state.selectedQZ}>
@@ -313,10 +292,33 @@ export default class RecognizerComponent extends Component {
                         <option value={16}>Sixteenth/Semiquaver</option>
                         <option value={32}>Thirty-Second/Demisemiquaver</option>
                     </select>
+                </div>
+                <div className='recognizer-row'>
+                    <h2 className="recognizer-column-title">
+                        Tempo/BPM:
+                        <span className='tooltip tt2'>
+                        The Tempo, or more simply the Beats Per Minute, is the number of single
+                        beats that come within one minute of music. What you select for this will
+                        work in conjunction with the time signature to generate the correct
+                        representation for your recorded music.
+                        </span>
+                    </h2>
                     <input type = "number" id = "tp" onChange={
                         (event) => {
                             this.setState({"selectedTP": parseInt(event.target.value)})}
                     }/>
+                </div>
+                <div className='recognizer-row'>
+                    <h2 className="recognizer-column-title">
+                        Time Signature:
+                        <span className='tooltip tt3'>
+                        The Time Signature signifies which type of note makes up a beat, as well
+                        as how many beats exist in a bar. The number on the left denotes the latter
+                        and the number on the right denotes the former. For example, a time signature
+                        of 4/4 means that 4 notes a quarter in length make up a bar. Likewise, a time
+                        signature of 2/4 means that a bar holds 2 notes a quarter in length.
+                        </span>
+                    </h2>
                     <select name="timesignatures" id="ts" onChange={
                         (event) => {this.setState({"selectedTS": event.target.value})}
                     }>

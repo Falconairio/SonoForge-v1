@@ -95,20 +95,29 @@ html, body, .App, #root {
   align-items: center;
 }
 
-.recognizer-columns {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  align-items: center;
-  width: 30rem;
-  margin-bottom: 1rem;
-}
-
-.recognizer-column {
+.recognizer-rows {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  height: 100%;
+  align-items: center;
+  width: 20rem;
+  margin-bottom: 1rem;
+}
+
+.recognizer-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.recognizer-row input, .recognizer-row select {
+  width: 5rem;
+  box-sizing: border-box;
+}
+
+#qz {
+  width: 7rem;
 }
 
 .recognizer-column-title {
