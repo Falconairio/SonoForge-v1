@@ -186,7 +186,6 @@ export default class RecognizerComponent extends Component {
             if (autoCorrelateValue === -1) {
                 //and there was a note being held
                 if(heldNote.length > 0) {
-                    //CHANGE THIS TO ROUND
                     if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2) {
                         let note = {pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
                         startTime: st, 
@@ -206,7 +205,7 @@ export default class RecognizerComponent extends Component {
             //if there IS a note detected on this loop
             } else {
                 //and it is DIFFERENT to the note 
-                if(currentNote !== heldNote) {
+                if(currentNote !== heldNote || currentOctave !== heldNoteOctave) {
                     //and it is close enough to the note length we need to round to, as well as the held note
                     //not being empty
                     if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0) {
