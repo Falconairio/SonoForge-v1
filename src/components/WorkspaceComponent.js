@@ -120,9 +120,7 @@ export default class WorkspaceComponent extends Component {
             this.setState({playing:false})
             return;
           }
-        this.state.player.start(this.state.currentSequence, () => {
-
-        })
+        this.state.player.start(this.state.currentSequence)
     }
 
     playGeneration = () => {
@@ -135,11 +133,21 @@ export default class WorkspaceComponent extends Component {
     }
 
     insertGeneration = () => {
-        let generate = this.state.generatedSequence;
-        if(generate && generate.notes.length > 0 && this.state.whiteSpaceSelected) {
+        const generation = this.state.generatedSequence;
+        if(generation && generation.notes.length > 0 && this.state.whiteSpaceSelected) {
             const el = this.state.selectedElement;
-            const columnPosition = parseInt(el.substring(1,el.indexOf(",")))
+            const selectedStep = parseInt(el.substring(1,el.indexOf(",")))
 
+            const qzNS = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
+            let splitPortions = sequences.split(qzNS,selectedStep)
+            splitPortions.splice(1,0,generation)
+
+            const newQZ = sequences.concatenate(splitPortions);
+            const newSeq = sequences.unquantizeSequence(newQZ,this.state.selectedTP)
+
+            this.setState({currentSequence: newSeq})
+
+            this.setupGrid()
         }
     }
 
@@ -364,9 +372,15 @@ export default class WorkspaceComponent extends Component {
     }
 
     setupGrid = () => {
-        this.dumpGrid()
-        this.setupNotesOnGrid()
-        this.populateWhiteSpace()
+        this.setState({
+            layout: [],
+            notesToRender: [],
+            positionsFilled: {},
+            hasFinishedCalculating: false
+        }, () => {
+            this.setupNotesOnGrid()
+            this.populateWhiteSpace()
+        })
     }
 
 
