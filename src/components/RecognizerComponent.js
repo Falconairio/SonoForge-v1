@@ -8,13 +8,6 @@ export default class RecognizerComponent extends Component {
     state = {
         player : null,
         isRecording : false,
-        noteSequence: {
-            notes: [
-                {pitch: 65, startTime: 1.0, endTime: 2.0},
-                {pitch: 65, startTime: 5.0, endTime: 6.0}
-            ],
-            totalTime: 20
-          },
         notes: [],
         seconds: 0,
         timerCallback: null,
@@ -23,6 +16,13 @@ export default class RecognizerComponent extends Component {
         selectedTS: "4/4",
         selectedQZ: 4,
         selectedTP: 60,
+        noteSequence: {
+            notes: [
+                {pitch: 65, startTime: 1.0, endTime: 2.0},
+                {pitch: 65, startTime: 5.0, endTime: 6.0}
+            ],
+            totalTime: 16
+          },
         inputsInView: true
     }
 
@@ -254,8 +254,12 @@ export default class RecognizerComponent extends Component {
     }
 
     submit = () => {
+        let updateSequence = this.state.noteSequence;
+        let tS = this.state.selectedTS
+        updateSequence.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
+        updateSequence.tempos = [{time: 0, qpm: this.state.selectedTP}]
         this.props.complete(
-            this.state.noteSequence,
+            updateSequence,
             this.state.selectedTS,
             this.state.selectedQZ,
             this.state.selectedTP)

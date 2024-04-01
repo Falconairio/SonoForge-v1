@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import RecognizerComponent from './components/RecognizerComponent';
 import WorkspaceComponent from './components/WorkspaceComponent';
-import NotationComponent from './components/NotationComponent';
+import TranscriptionComponent from './components/TranscriptionComponent';
 
 class MainActivity extends Component {
     state = {
         renderComponent: 'input',
         noteSequence: null,
+        changedSequence: null,
         selectedTS: "",
         selectedQZ: 0,
         selectedTP: 0,
@@ -41,7 +42,12 @@ class MainActivity extends Component {
                 qz = {this.state.selectedQZ} />;
                 break;
             case 'output':
-                componentToRender = <NotationComponent />;
+                componentToRender = <TranscriptionComponent
+                notes = {this.state.changedSequence}
+                ts = {this.state.selectedTS}
+                tp = {this.state.selectedTP}
+                qz = {this.state.selectedQZ}
+                 />;
                 break;
             default:
                 componentToRender = <RecognizerComponent />;

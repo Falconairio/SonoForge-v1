@@ -10,7 +10,7 @@ export default class WorkspaceComponent extends Component {
     state = {
         player : null,
         model : new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn'),
-        temperature : 0.5,
+        temperature : 0.9,
         steps: 16,
         currentSequence: {
             notes: [
@@ -19,6 +19,7 @@ export default class WorkspaceComponent extends Component {
         },
         generatedSequence: null,
         generating: false,
+        playing: false,
         noteArr : ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
         selectedTS: "4/4",
         selectedQZ: 4,
@@ -41,7 +42,12 @@ export default class WorkspaceComponent extends Component {
 
     componentDidMount = () => {
         this.setState({
-            player: new Player(),
+            player: new Player(false, {
+                run: (note) => {},
+                stop: () => {
+                    this.setState({playing: false})
+                }
+            }),
             currentSequence: this.props.notes,
             selectedTS: this.props.ts,
             selectedQZ: this.props.qz,
@@ -82,42 +88,59 @@ export default class WorkspaceComponent extends Component {
     generateSequence = () => {
         if (this.state.player.isPlaying()) {  
             this.state.player.stop();
+            this.setState({playing: false})
             return;
           }
         
-        this.setState({
-            generating: true
-        }, () => {
-            console.log(4/this.state.selectedQZ);
-            let notes = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
-            console.log(notes);
-            this.state.model
-            .continueSequence(notes, this.state.steps, this.state.temperature)
-            .then((sample) => {
-                console.log(sample);
-                if(sample.notes.length > 0) {
-                    this.setState({
-                        generatedSequence : sample,
-                        generating: false
-                    })
-                }
-            }).catch( (err) => console.log(err))
-        })
+        let notes = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
+        this.state.model
+        .continueSequence(notes, this.state.steps, this.state.temperature)
+        .then((sample) => {
+            let tS = this.state.selectedTS
+            sample.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
+            sample.tempos = [{time: 0, qpm: this.state.selectedTP}]
+            if(sample.notes.length > 0) {
+                this.setState({
+                    generatedSequence : sample,
+                    generating: false
+                })
+            } else {
+                alert("The AI could not generate a suitable generation for your sample. For very short samples " +
+                "there will be nothing outputted for low levels of randomness. If your sample is short, try " +
+                "increasing the randomness")
+                this.setState({
+                    generating: false
+                })
+            }
+        }).catch( (err) => console.log(err))
     }
-    playSequence = (sequence ) => {
+    playSequence = () => {
         if (this.state.player.isPlaying() || this.state.currentSequence.totalTime === 0) {  
             this.state.player.stop();
+            this.setState({playing:false})
             return;
           }
-        this.state.player.start(this.state.currentSequence)
+        this.state.player.start(this.state.currentSequence, () => {
+
+        })
     }
 
     playGeneration = () => {
         if (this.state.player.isPlaying() || this.state.generatedSequence == null) {  
             this.state.player.stop();
+            this.setState({playing: false})
             return;
           }
         this.state.player.start(this.state.generatedSequence)
+    }
+
+    insertGeneration = () => {
+        let generate = this.state.generatedSequence;
+        if(generate && generate.notes.length > 0 && this.state.whiteSpaceSelected) {
+            const el = this.state.selectedElement;
+            const columnPosition = parseInt(el.substring(1,el.indexOf(",")))
+
+        }
     }
 
     noteFromPitch = (pitch) => {
@@ -251,7 +274,7 @@ export default class WorkspaceComponent extends Component {
                 isResizable: true
             }
 
-            this.registerPosition(startBeat,endBeat,rowToSet)
+            this.registerPosition(elementKey,startBeat,endBeat,rowToSet)
 
             let noteObj = {
                 key: elementKey,
@@ -260,7 +283,7 @@ export default class WorkspaceComponent extends Component {
                     this.setState({
                         noteSelected: true,
                         whiteSpaceSelected: false,
-                        isMenuOpen: false,
+                        // isMenuOpen: false,
                         selectedElement: elementKey,
                     })
                 }
@@ -283,7 +306,7 @@ export default class WorkspaceComponent extends Component {
     registerPosition = (x1,x2,y) => {
         let posObj = this.state.positionsFilled
         for(let i = x1; i < x2; i++) {
-            posObj[`${x1},${y}`] = true;  
+            posObj[`${x1},${y}`] = true;
         } 
         this.setState({
             positionsFilled: posObj
@@ -322,7 +345,6 @@ export default class WorkspaceComponent extends Component {
                             this.setState({
                                 noteSelected: false,
                                 whiteSpaceSelected: true,
-                                isMenuOpen: false,
                                 selectedElement: elementKey
                             })
                         }
@@ -423,22 +445,32 @@ export default class WorkspaceComponent extends Component {
                         <div className='flexcolumn' id = "generator-inputs">
                             <div className = "workspace-button-menu-sub">
                                 <label>
-                                    Randomness: {(Math.ceil((this.state.temperature/1.5) * 100))}%
+                                    Randomness: {(Math.ceil(((this.state.temperature - 0.9)/0.6) * 100))}%
                                 </label>
                                 <input type = "range" id = "temperature" name = "temp" 
-                                value = {this.state.temperature} min = "0.0" max = "1.5" step="0.05" 
+                                value = {this.state.temperature} min = "0.9" max = "1.5" step="0.05" 
                                 onChange={(event) => {
                                     this.setState({temperature: parseFloat(event.target.value)})
                                 }}></input>
                             </div>
                             <div className='workspace-button-menu-sub'>
                                 <label id = "steps">Steps:</label>
-                                <input id = "steps" type='number'></input>
+                                <input id = "steps" type='number' onChange={(event) => {
+                                    this.setState({steps: parseFloat(event.target.value)})
+                                }} min = "0" step = "1" value={this.state.steps}></input>
                             </div>
                         </div>
                         <div className='flexcolumn' id = "generator-buttons">
                             <button className='workspace-sub-button active activeclick'
-                            onClick = {this.generateSequence}>
+                            onClick = { () => {
+                                if(this.state.steps > 0 && this.state.steps % 1 === 0) {
+                                    this.setState({generating: true}, () => {
+                                        this.generateSequence()
+                                    })
+                                } else {
+                                    alert("Please provide a step value that is a whole number greater than zero.")
+                                }
+                            }}>
                             {
                                 this.state.generating ? "Loading..." :
                                 this.state.generatedSequence != null ? "Regenerate" : "Generate"
@@ -449,10 +481,21 @@ export default class WorkspaceComponent extends Component {
                             : 'workspace-sub-button inactive inactiveclick'}
                             onClick = { () => {
                                     if(this.state.generatedSequence !== null) {
-                                        this.playGeneration()
+                                        this.setState({playing: true}, () => {
+                                            this.playGeneration()
+                                        })
                                     }
-                                }}>Listen</button>
-                            <button className='workspace-sub-button inactive inactiveclick'>Place</button>
+                                }}>{this.state.playing ? "Listening..." : "Listen" }</button>
+                            <button className={this.state.generatedSequence !== null
+                            && this.state.whiteSpaceSelected === true 
+                            ? 'workspace-sub-button active activeclick'
+                            : 'workspace-sub-button inactive inactiveclick'}
+                            onClick = { () => {
+                                    if(this.state.generatedSequence !== null &&
+                                    this.state.whiteSpaceSelected === true) {
+                                        this.insertGeneration()
+                                    }
+                                }}>Place</button>
                         </div>
                     </div>
             )}
