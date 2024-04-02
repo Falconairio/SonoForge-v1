@@ -133,22 +133,98 @@ export default class WorkspaceComponent extends Component {
     }
 
     insertGeneration = () => {
-        const generation = this.state.generatedSequence;
+        const genSeqRef = this.state.generatedSequence;
+        const generation = {
+            notes: [...genSeqRef.notes],
+            quantizationInfo: genSeqRef.quantizationInfo,
+            tempos: genSeqRef.tempos,
+            timeSignatures: genSeqRef.timeSignatures,
+            totalQuantizedSteps: genSeqRef.totalQuantizedSteps
+        };
+        const genLength = generation.totalQuantizedSteps;
         if(generation && generation.notes.length > 0 && this.state.whiteSpaceSelected) {
             const el = this.state.selectedElement;
-            const selectedStep = parseInt(el.substring(1,el.indexOf(",")))
-
+            
+            let selectedStep = parseInt(el.substring(1,el.indexOf(",")))
             const qzNS = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
-            let splitPortions = sequences.split(qzNS,selectedStep)
-            splitPortions.splice(1,0,generation)
+            const firstHalf = {
+                notes: [],
+                quantizationInfo: qzNS.quantizationInfo,
+                tempos: qzNS.tempos,
+                timeSignatures: qzNS.timeSignatures
+            };
+            const secondHalf = {
+                notes: [],
+                quantizationInfo: qzNS.quantizationInfo,
+                tempos: qzNS.tempos,
+                timeSignatures: qzNS.timeSignatures
+            };
+            // let splitPortions = sequences.split(qzNS,selectedStep)
+            // splitPortions.splice(1,0,generation)
+            for(let i = 0; i < qzNS.notes.length; i++) {
+                const currentNote = qzNS.notes[i];
+                if(currentNote.quantizedStartStep < selectedStep &&
+                    currentNote.quantizedEndStep <= selectedStep) {
+                        firstHalf.notes.push(currentNote)
+                } else if(currentNote.quantizedStartStep >= selectedStep) {
+                    const restOfNotes = qzNS.notes.slice(i, qzNS.notes.length);
+                    const pushedBackNotes = this.pushBackSequenceByLengthOfSteps(genLength, restOfNotes);
+                    secondHalf.notes = secondHalf.notes.concat(pushedBackNotes);
+                    break;
+                } else if(currentNote.quantizedStartStep < selectedStep &&
+                    currentNote.quantizedEndStep > selectedStep) {
+                        firstHalf.notes.push(
+                            {
+                                pitch: currentNote.pitch,
+                                quantizedStartStep: currentNote.quantizedStartStep,
+                                quantizedEndStep: selectedStep
+                            }
+                        )
+                        secondHalf.notes.push(
+                            {
+                                pitch: currentNote.pitch,
+                                quantizedStartStep: selectedStep + genLength,
+                                quantizedEndStep: currentNote.quantizedEndStep + genLength
+                            }
+                        )
+                        if(i < qzNS.notes.length) {
+                            const restOfNotes = qzNS.notes.slice(i, qzNS.notes.length);
+                            const pushedBackNotes = this.pushBackSequenceByLengthOfSteps(genLength, restOfNotes);
+                            secondHalf.notes = secondHalf.notes.concat(pushedBackNotes);
+                        }
+                        break;
+                    }
+            }
+            const offsetGeneration = this.pushBackSequenceByLengthOfSteps(selectedStep,
+                generation.notes)
 
-            const newQZ = sequences.concatenate(splitPortions);
-            const newSeq = sequences.unquantizeSequence(newQZ,this.state.selectedTP)
+            const finalSequence = {
+                notes: firstHalf.notes.concat(offsetGeneration.concat(secondHalf.notes)),
+                quantizationInfo: qzNS.quantizationInfo,
+                tempos: qzNS.tempos,
+                timeSignatures: qzNS.timeSignatures
+            }
 
-            this.setState({currentSequence: newSeq})
+            const newSeq = sequences.unquantizeSequence(finalSequence,this.state.selectedTP)
 
-            this.setupGrid()
+            this.setState({currentSequence: newSeq}, () => {
+                this.setState({numberColumns: this.calculateTotalCols()}, () => {
+                    this.setupGrid()
+                })
+            })
         }
+    }
+
+    pushBackSequenceByLengthOfSteps = (length, sequence) => {
+        return sequence.map(note => {
+            return {
+                ...note,
+                quantizedStartStep: note.quantizedStartStep + length,
+                quantizedEndStep: note.quantizedEndStep + length,
+                startTime: note.startTime + length,
+                endTime: note.endTime + length
+            };
+        });
     }
 
     noteFromPitch = (pitch) => {
@@ -355,6 +431,7 @@ export default class WorkspaceComponent extends Component {
                                 whiteSpaceSelected: true,
                                 selectedElement: elementKey
                             })
+                            console.log(elementKey);
                         }
                     }
 
@@ -376,7 +453,10 @@ export default class WorkspaceComponent extends Component {
             layout: [],
             notesToRender: [],
             positionsFilled: {},
-            hasFinishedCalculating: false
+            hasFinishedCalculating: false,
+            selectedElement: "",
+            noteSelected: false,
+            whiteSpaceSelected: false
         }, () => {
             this.setupNotesOnGrid()
             this.populateWhiteSpace()
