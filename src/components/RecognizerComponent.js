@@ -19,7 +19,7 @@ export default class RecognizerComponent extends Component {
         noteSequence: {
             notes: [
                 {pitch: 65, startTime: 1.0, endTime: 2.0},
-                {pitch: 65, startTime: 5.0, endTime: 6.0}
+                {pitch: 65, startTime: 5.0, endTime: 8.0}
             ],
             totalTime: 16
           },

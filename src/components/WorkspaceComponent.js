@@ -90,29 +90,42 @@ export default class WorkspaceComponent extends Component {
             this.state.player.stop();
             this.setState({playing: false})
             return;
-          }
-        
-        let notes = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
-        this.state.model
-        .continueSequence(notes, this.state.steps, this.state.temperature)
-        .then((sample) => {
-            let tS = this.state.selectedTS
-            sample.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
-            sample.tempos = [{time: 0, qpm: this.state.selectedTP}]
-            if(sample.notes.length > 0) {
-                this.setState({
-                    generatedSequence : sample,
-                    generating: false
-                })
-            } else {
+        }
+
+        const tS = this.state.selectedTS
+        const notes = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
+        let generationCount = 0
+        const MAX_GEN_COUNT = 5;
+
+        const generate = () => {
+            if(generationCount === MAX_GEN_COUNT) {
                 alert("The AI could not generate a suitable generation for your sample. For very short samples " +
-                "there will be nothing outputted for low levels of randomness. If your sample is short, try " +
-                "increasing the randomness")
+                        "there will be nothing outputted for low levels of randomness. If your sample is short, try " +
+                        "increasing the randomness")
                 this.setState({
                     generating: false
                 })
+                return;
+            } else {
+                this.state.model
+                .continueSequence(notes, this.state.steps, this.state.temperature)
+                .then((sample) => {
+                    sample.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
+                    sample.tempos = [{time: 0, qpm: this.state.selectedTP}]
+                    if(sample.notes.length > 0) {
+                        this.setState({
+                            generatedSequence : sample,
+                            generating: false
+                        })
+                    } else {
+                        generationCount++;
+                        generate();
+                    }
+                }).catch( (err) => console.log(err))
             }
-        }).catch( (err) => console.log(err))
+        }
+
+        generate();
     }
     playSequence = () => {
         if (this.state.player.isPlaying() || this.state.currentSequence.totalTime === 0) {  
@@ -147,20 +160,21 @@ export default class WorkspaceComponent extends Component {
             
             let selectedStep = parseInt(el.substring(1,el.indexOf(",")))
             const qzNS = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
+
             const firstHalf = {
                 notes: [],
                 quantizationInfo: qzNS.quantizationInfo,
                 tempos: qzNS.tempos,
                 timeSignatures: qzNS.timeSignatures
             };
+
             const secondHalf = {
                 notes: [],
                 quantizationInfo: qzNS.quantizationInfo,
                 tempos: qzNS.tempos,
                 timeSignatures: qzNS.timeSignatures
             };
-            // let splitPortions = sequences.split(qzNS,selectedStep)
-            // splitPortions.splice(1,0,generation)
+
             for(let i = 0; i < qzNS.notes.length; i++) {
                 const currentNote = qzNS.notes[i];
                 if(currentNote.quantizedStartStep < selectedStep &&
@@ -188,7 +202,7 @@ export default class WorkspaceComponent extends Component {
                             }
                         )
                         if(i < qzNS.notes.length) {
-                            const restOfNotes = qzNS.notes.slice(i, qzNS.notes.length);
+                            const restOfNotes = qzNS.notes.slice(i + 1, qzNS.notes.length);
                             const pushedBackNotes = this.pushBackSequenceByLengthOfSteps(genLength, restOfNotes);
                             secondHalf.notes = secondHalf.notes.concat(pushedBackNotes);
                         }
