@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { MusicRNN, Player, sequences } from "@magenta/music";
 import generateLookupTable from "./../scripts/noteLTableGenerator";
+import noteToHeightAdjust from '../scripts/noteToHeightAdjust';
+import octaveToColor from '../scripts/octaveToColor';
 import Timeline from './Timeline';
 import ReactGridLayout from 'react-grid-layout';
 import "/node_modules/react-grid-layout/css/styles.css"
@@ -246,62 +248,6 @@ export default class WorkspaceComponent extends Component {
         return this.state.noteArr[(Math.round( noteNum ) + 69) % 12];
     }
 
-    octaveToColor = (octave) => {
-        switch(octave) {
-            case 0:
-                return "blue"
-            case 1:
-                return "red"
-            case 2:
-                return "green"
-            case 3:
-                return "yellow"
-            case 4:
-                return "orange"
-            case 5:
-                return "purple"
-            case 6:
-                return "pink"
-            case 7:
-                return "teal"
-            case 8:
-                return "brown"
-            default:
-                return
-        }
-    }
-
-    noteToHeightAdjust = (note) => {
-        switch(note) {
-            case "C":
-                return 0;
-            case "C#":
-                return 1;
-            case "D":
-                return 2;
-            case "D#":
-                return 3;
-            case "E":
-                return 4;
-            case "F":
-                return 5;
-            case "F#":
-                return 6;
-            case "G":
-                return 7;
-            case "G#":
-                return 8;
-            case "A":
-                return 9;
-            case "A#":
-                return 10;
-            case "B":
-                return 11;
-            default:
-                return;
-        }
-    }
-
     calculateNoBars = () => {
         let beatLengthInSeconds = 60/this.state.selectedTP
         return Math.ceil((this.state.currentSequence.totalTime / beatLengthInSeconds)/this.state.selectedTS[0])
@@ -355,8 +301,8 @@ export default class WorkspaceComponent extends Component {
             let note = fullNote.slice(0,fullNote.length - 1)
             let startBeat = this.decideBeat(value.startTime)
             let endBeat = this.decideBeat(value.endTime)
-            let colorClass = this.octaveToColor(octave)
-            let rowToSet = this.noteToHeightAdjust(note)
+            let colorClass = octaveToColor(octave)
+            let rowToSet = noteToHeightAdjust(note)
 
             let elementKey = `N${counter}`;
 
@@ -564,7 +510,12 @@ export default class WorkspaceComponent extends Component {
                             <div className='workspace-button-menu-sub'>
                                 <label id = "steps">Steps:</label>
                                 <input id = "steps" type='number' onChange={(event) => {
-                                    this.setState({steps: parseFloat(event.target.value)})
+                                    let value = event.target.value;
+                                    if (!isNaN(value) && value.trim() !== "") {
+                                        this.setState({steps: parseFloat(value)})
+                                    } else {
+                                        this.setState({steps: ""})
+                                    }
                                 }} min = "0" step = "1" value={this.state.steps}></input>
                             </div>
                         </div>
