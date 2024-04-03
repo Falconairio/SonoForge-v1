@@ -7,7 +7,6 @@ import Timeline from './Timeline';
 import ReactGridLayout from 'react-grid-layout';
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
-import octaveFromPitch from '../scripts/octaveFromPitch';
 import valueAndOctaveFromString from '../scripts/valueAndOctaveFromString';
 
 export default class WorkspaceComponent extends Component {
