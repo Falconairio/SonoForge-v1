@@ -480,6 +480,37 @@ html, body, .App, #root {
   background-color: rgb(247, 160, 150);
 }
 
+#edit {
+  width: 9rem;
+  align-items: center;
+}
+#edit label {
+  font-weight: bold;
+  margin-bottom: 0.1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+}
+#edit .flexcolumn {
+  justify-content: left;
+}
+#edit select {
+  font-size: 1rem;
+  font-family: "Cabin", sans-serif;
+}
+#edit p {
+  font-size: 0.9rem;
+  color: red;
+  cursor: pointer;
+}
+#edit p:hover {
+  text-decoration: underline;
+}
+
+#edittoprow {
+  width: 10rem;
+}
+
 #listenbutton {
   min-width: 8rem;
 }/*# sourceMappingURL=App.css.map */

@@ -7,6 +7,8 @@ import Timeline from './Timeline';
 import ReactGridLayout from 'react-grid-layout';
 import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
+import octaveFromPitch from '../scripts/octaveFromPitch';
+import valueAndOctaveFromString from '../scripts/valueAndOctaveFromString';
 
 export default class WorkspaceComponent extends Component {
     state = {
@@ -42,15 +44,23 @@ export default class WorkspaceComponent extends Component {
         selectedElement: "",
         isMenuOpen: false,
         specificMenuOpen: 0,
+        selectedNoteValue: "",
+        selectedOctave: ""
     }
 
     componentDidMount = () => {
         this.setState({
             player: new Player(false, {
                 run: (note) => {
+                    console.log();
                     if(this.state.playing) {
+                        let soundedNote = valueAndOctaveFromString(
+                            this.state.lookupTable[note.pitch]
+                        )
                         this.setState({selectedElement: "N" + this.state.noteCounter,
-                        noteCounter: this.state.noteCounter + 1})
+                        noteCounter: this.state.noteCounter + 1,
+                        selectedNoteValue: soundedNote[0],
+                        selectedNoteOctave: soundedNote[1]})
                     }
                 },
                 stop: () => {
@@ -336,6 +346,8 @@ export default class WorkspaceComponent extends Component {
                         whiteSpaceSelected: false,
                         // isMenuOpen: false,
                         selectedElement: elementKey,
+                        selectedNoteOctave: octave,
+                        selectedNoteValue: note
                     })
                 }
             }
@@ -428,6 +440,41 @@ export default class WorkspaceComponent extends Component {
             this.setupNotesOnGrid()
             this.populateWhiteSpace()
         })
+    }
+
+    changeNotePosition = (deleteFlag) => {
+        const selectedElementCopy = this.state.selectedElement
+        const notePosition = parseInt(this.state.selectedElement.substring(1));
+        const currentSequenceCopy = {...this.state.currentSequence};
+        const notesCopy = [...currentSequenceCopy.notes];
+        const selectedNote = notesCopy[notePosition];
+
+        if(deleteFlag) {
+            notesCopy.splice(notePosition,1)
+        } else {
+            selectedNote.pitch = this.state.lookupTable[
+                `${this.state.selectedNoteValue}${this.state.selectedNoteOctave}`
+            ]; 
+            notesCopy[notePosition] = selectedNote;
+        }
+        currentSequenceCopy.notes = notesCopy;
+
+        this.setState({ currentSequence: currentSequenceCopy }, () => {
+            this.setupGrid()
+            if(!deleteFlag) {
+                this.setState({
+                    selectedElement: selectedElementCopy,
+                    noteSelected: true
+                })
+            } else {
+                this.setState({
+                    isMenuOpen: false,
+                    specificMenuOpen: 0,
+                    selectedElement: "",
+                    noteSelected: false
+                })
+            }
+        });
     }
 
     submit = (component) => {
@@ -615,8 +662,50 @@ export default class WorkspaceComponent extends Component {
                 }
             }>Edit Note</button>
                 {this.state.isMenuOpen && this.state.specificMenuOpen === 4 && (
-                    <div className="workspace-button-menu">
-                        <h1>Editing Note!</h1>
+                    <div className="workspace-button-menu flexcolumn" id = "edit">
+                        <div className='flexrow' id = "edittoprow">
+                            <div className='flexcolumn'>
+                                <label htmlFor='editnoteselect'>
+                                    Note:
+                                </label>
+                                <select id = "editnoteselect"
+                                onChange={(event) => {
+                                    this.setState({
+                                        selectedNoteValue: event.target.value
+                                    }, () => {
+                                        this.changeNotePosition(false)
+                                    })
+                                }}
+                                value = {this.state.selectedNoteValue}>
+                                    {this.state.noteArr.map((note) => (
+                                        <option key={note}>{note}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className='flexcolumn'>
+                                <label htmlFor="editoctaveselect">
+                                    Octave:
+                                </label>
+                                <select id = "editoctaveselect"
+                                onChange={(event) => {
+                                    this.setState({
+                                        selectedNoteOctave: event.target.value
+                                    }, () => {
+                                        this.changeNotePosition(false)
+                                    })
+                                }}
+                                value = {this.state.selectedNoteOctave}>
+                                    {[...Array(9)].map((_, index) => (
+                                        <option key={index} value={index}>{index}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <p onClick = {() => {
+                            this.changeNotePosition(true);
+                        }}
+                        >Delete Note</p>
                     </div>
             )}
             </div>

@@ -281,6 +281,42 @@
     background-color: rgb(247, 160, 150);;
 }
 
+#edit {
+    width: 9rem;
+    align-items: center;
+
+    & label {
+        font-weight: bold;
+        margin-bottom: 0.1rem;
+        display: flex;
+        flex-direction: row;
+        justify-content: start;
+    }
+
+    & .flexcolumn {
+        justify-content: left;
+    }
+
+    & select {
+        font-size: 1rem;
+        font-family: $font-family;
+    }
+
+    & p {
+        font-size: 0.9rem;
+        color: red;
+        cursor: pointer;
+    }
+
+    & p:hover {
+        text-decoration: underline;
+    }
+}
+
+#edittoprow {
+    width: 10rem;
+}
+
 #listenbutton {
     min-width: 8rem;
 }
