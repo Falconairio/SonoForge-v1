@@ -22,6 +22,8 @@ export default class WorkspaceComponent extends Component {
         generatedSequence: null,
         generating: false,
         playing: false,
+        playingGeneration: false,
+        noteCounter: 0,
         noteArr : ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
         selectedTS: "4/4",
         selectedQZ: 4,
@@ -45,9 +47,18 @@ export default class WorkspaceComponent extends Component {
     componentDidMount = () => {
         this.setState({
             player: new Player(false, {
-                run: (note) => {},
+                run: (note) => {
+                    if(this.state.playing) {
+                        this.setState({selectedElement: "N" + this.state.noteCounter,
+                        noteCounter: this.state.noteCounter + 1})
+                    }
+                },
                 stop: () => {
-                    this.setState({playing: false})
+                    if(this.state.playing) {
+                        this.setState({playing: false, selectedElement: "", noteCounter: 0})
+                    } else if(this.state.playingGeneration) {
+                        this.setState({playingGeneration: false})
+                    } 
                 }
             }),
             currentSequence: this.props.notes,
@@ -90,8 +101,9 @@ export default class WorkspaceComponent extends Component {
     generateSequence = () => {
         if (this.state.player.isPlaying()) {  
             this.state.player.stop();
-            this.setState({playing: false})
-            return;
+            this.state.playing 
+            ? this.setState({playing: false, selectedElement: "", noteCounter: 0})
+            : this.setState({playingGeneration: false})
         }
 
         const tS = this.state.selectedTS
@@ -129,22 +141,17 @@ export default class WorkspaceComponent extends Component {
 
         generate();
     }
-    playSequence = () => {
-        if (this.state.player.isPlaying() || this.state.currentSequence.totalTime === 0) {  
+    playSequence = (sequence) => {
+        if (this.state.player.isPlaying()) {  
             this.state.player.stop();
-            this.setState({playing:false})
+            this.state.playing && this.state.playingGeneration
+            ? this.setState({playing: false, selectedElement: "", noteCounter: 0, playingGeneration: false})
+            : this.state.playing 
+            ? this.setState({playing: false, selectedElement: "", noteCounter: 0})
+            : this.setState({playingGeneration: false})
             return;
-          }
-        this.state.player.start(this.state.currentSequence)
-    }
-
-    playGeneration = () => {
-        if (this.state.player.isPlaying() || this.state.generatedSequence == null) {  
-            this.state.player.stop();
-            this.setState({playing: false})
-            return;
-          }
-        this.state.player.start(this.state.generatedSequence)
+        }
+        this.state.player.start(sequence)
     }
 
     insertGeneration = () => {
@@ -539,12 +546,15 @@ export default class WorkspaceComponent extends Component {
                             ? 'workspace-sub-button active activeclick'
                             : 'workspace-sub-button inactive inactiveclick'}
                             onClick = { () => {
-                                    if(this.state.generatedSequence !== null) {
-                                        this.setState({playing: true}, () => {
-                                            this.playGeneration()
+                                    if(this.state.generatedSequence !== null &&
+                                        this.state.generatedSequence.totalQuantizedSteps > 0) {
+                                        this.setState({playingGeneration: true}, () => {
+                                            this.playSequence(
+                                                this.state.generatedSequence
+                                            )
                                         })
                                     }
-                                }}>{this.state.playing ? "Listening..." : "Listen" }</button>
+                                }}>{this.state.playingGeneration ? "Listening..." : "Listen" }</button>
                             <button className={this.state.generatedSequence !== null
                             && this.state.whiteSpaceSelected === true 
                             ? 'workspace-sub-button active activeclick'
@@ -592,6 +602,29 @@ export default class WorkspaceComponent extends Component {
                         <h1>Editing Note!</h1>
                     </div>
             )}
+            </div>
+
+            <div className="button-container" id = "listenbutton">
+                <button className= {
+                   this.state.currentSequence.totalTime === 0
+                    ? 'workspace-page-button inactive'
+                    : this.state.playing 
+                    ? 'workspace-page-button inactive'
+                    : 'workspace-page-button active'
+                }
+                
+                onClick= {() => {
+                    if(this.state.currentSequence &&
+                    this.state.currentSequence.totalTime > 0) {
+                        this.setState({
+                            playing: true
+                        }, () => {
+                            this.playSequence(this.state.currentSequence)
+                        })
+                    }
+                }}>{
+                    this.state.playing ? "Listening..." : "Listen"
+                }</button>
             </div>
 
             <div className="button-container">
