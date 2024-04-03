@@ -430,6 +430,15 @@ export default class WorkspaceComponent extends Component {
         })
     }
 
+    submit = (component) => {
+        this.props.complete(
+            this.state.currentSequence,
+            this.state.selectedTS,
+            this.state.selectedQZ,
+            this.state.selectedTP,
+            component)
+    }
+
 
   render() {
     return (
@@ -488,8 +497,16 @@ export default class WorkspaceComponent extends Component {
                     })}
                 }>Rerecord</button>
                 {this.state.isMenuOpen && this.state.specificMenuOpen === 1 && (
-                    <div className="workspace-button-menu">
-                        <h1>Are you sure?</h1>
+                    <div className="workspace-button-menu confirm-menu">
+                        <div className='flexcolumn'>
+                            <h2>Are you sure?</h2>
+                            <div className="flexrow">
+                                <button className="workspace-sub-button active activeclick"
+                                onClick = {() => this.submit("input")}>Yes</button>
+                                <button className="workspace-sub-button active inactiveclick"
+                                onClick = {() => this.setState({isMenuOpen: false, specificMenuOpen: 0})}>No</button>
+                            </div>
+                        </div>
                     </div>
             )}
             </div>
@@ -636,8 +653,16 @@ export default class WorkspaceComponent extends Component {
                     })}
                 }>Finish</button>
                 {this.state.isMenuOpen && this.state.specificMenuOpen === 5 && (
-                    <div className="workspace-button-menu">
-                        <h1>Done Composing?</h1>
+                    <div className="workspace-button-menu confirm-menu">
+                        <div className='flexcolumn'>
+                            <h2>Done Composing?</h2>
+                            <div className="flexrow">
+                            <button className="workspace-sub-button active activeclick"
+                                onClick = {() => this.submit("output")}>Yes</button>
+                                <button className="workspace-sub-button active inactiveclick"
+                                onClick = {() => this.setState({isMenuOpen: false, specificMenuOpen: 0})}>No</button>
+                            </div>
+                        </div>
                     </div>
             )}
             </div>

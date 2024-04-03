@@ -432,6 +432,20 @@ html, body, .App, #root {
   align-items: start;
 }
 
+.confirm-menu {
+  width: 12rem;
+}
+.confirm-menu .flexcolumn {
+  height: 4.5rem;
+  justify-content: space-between;
+}
+.confirm-menu h2 {
+  margin: 0;
+}
+.confirm-menu button {
+  min-width: 3rem;
+}
+
 #generator {
   height: 7rem;
   width: 23rem;

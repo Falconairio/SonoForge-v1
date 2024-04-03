@@ -228,6 +228,23 @@
     }
 }
 
+.confirm-menu {
+    width: 12rem;
+
+    & .flexcolumn {
+        height: 4.5rem;
+        justify-content: space-between;
+    }
+
+    & h2 {
+        margin: 0
+    }
+
+    & button {
+        min-width: 3rem;
+    }
+}
+
 #generator {
     height: 7rem;
     width: 23rem;

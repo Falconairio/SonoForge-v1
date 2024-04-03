@@ -262,7 +262,8 @@ export default class RecognizerComponent extends Component {
             updateSequence,
             this.state.selectedTS,
             this.state.selectedQZ,
-            this.state.selectedTP)
+            this.state.selectedTP,
+            "main")
     }
 
   render() {

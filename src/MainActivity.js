@@ -17,12 +17,12 @@ class MainActivity extends Component {
         this.setState({ renderComponent: componentName });
     }
 
-    takeOutMusicData = (noteSequence,ts,qz,tp) => {
+    takeOutMusicData = (noteSequence,ts,qz,tp,component) => {
         this.setState({ noteSequence: noteSequence,
                         selectedTS: ts,
                         selectedQZ: qz,
                         selectedTP: tp, 
-                        renderComponent: 'main' });
+                        renderComponent: component});
     }
 
     render() {
@@ -35,7 +35,7 @@ class MainActivity extends Component {
                 break;
             case 'main':
                 componentToRender = <WorkspaceComponent
-                complete = {this.takeOutNoteSequence}
+                complete = {this.takeOutMusicData}
                 notes = {this.state.noteSequence}
                 ts = {this.state.selectedTS}
                 tp = {this.state.selectedTP}
