@@ -36,10 +36,11 @@ export default class WorkspaceComponent extends Component {
         //this is the number of notes there are in an octave
         numberRows: 12,
         //3.1875 is the amount in rem that a row should be in height
-        rowHeight: 3.1875 * 16,
+        rowHeight: 3.1875 * parseFloat(getComputedStyle(document.documentElement).fontSize),
         numberColumns: 0,
         hasFinishedCalculating: false,
-        elementToNoteLookupTable: {},
+        elementOctaveTable: {},
+        elementValueTable: {},
         noteSelected: false,
         whiteSpaceSelected: false,
         selectedElement: "",
@@ -293,25 +294,12 @@ export default class WorkspaceComponent extends Component {
         (noteTime % secondsInBar)/smallestBeatLength
     }
 
-    /**
-     * A function that resets everything to do with the visual representation
-     * of this grid, including the position of the notes and whitespace.
-     * When finished it will set the finished flag to true so that the 
-     * workspace becomes usable.
-     */
-    dumpGrid = () => {
-        this.setState({
-            layout: [],
-            notesToRender: [],
-            positionsFilled: {},
-            hasFinishedCalculating: false
-        })
-    }
-
     setupNotesOnGrid = () => {
         let counter = 0
         let layout = this.state.layout
         let renderedEls = this.state.notesToRender
+        const octaveTableCopy = {...this.state.elementOctaveTable}
+        const valueTableCopy = {...this.state.elementValueTable}
         this.state.currentSequence.notes.map((value,index) => {
             let fullNote = this.state.lookupTable[value.pitch]
             let octave = parseInt(fullNote.charAt(fullNote.length - 1))
@@ -320,9 +308,6 @@ export default class WorkspaceComponent extends Component {
             let endBeat = this.decideBeat(value.endTime)
             let colorClass = octaveToColor(octave)
             let rowToSet = noteToHeightAdjust(note)
-
-            // console.log(this.state.lookupTable);
-            // console.log(note);
 
             let elementKey = `N${counter}`;
 
@@ -335,12 +320,13 @@ export default class WorkspaceComponent extends Component {
                 minH: 1,
                 maxH: 1,
                 minW: 1,
-                isResizable: true
+                isResizable: true,
+                isDraggable: true,
             }
 
-            // console.log(rowToSet + " row to set");
-
             this.registerPosition(startBeat,endBeat,rowToSet)
+            octaveTableCopy[elementKey] = octave;
+            valueTableCopy[elementKey] = value;
 
             let noteObj = {
                 key: elementKey,
@@ -350,8 +336,10 @@ export default class WorkspaceComponent extends Component {
                         noteSelected: true,
                         whiteSpaceSelected: false,
                         selectedElement: elementKey,
-                        selectedNoteOctave: octave,
-                        selectedNoteValue: note
+                        //this is so even if the position of the note is changed the
+                        //right value can still be found
+                        selectedNoteOctave: this.state.elementOctaveTable[elementKey],
+                        selectedNoteValue: this.state.elementValueTable[elementKey]
                     })
                 }
             }
@@ -366,7 +354,9 @@ export default class WorkspaceComponent extends Component {
 
         this.setState({
             layout: layout,
-            notesToRender: renderedEls
+            notesToRender: renderedEls,
+            elementOctaveTable: octaveTableCopy,
+            elementValueTable: valueTableCopy
         })
     }
 
@@ -435,6 +425,7 @@ export default class WorkspaceComponent extends Component {
             layout: [],
             notesToRender: [],
             positionsFilled: {},
+            elementOctaveTable: {},
             hasFinishedCalculating: false,
             selectedElement: "",
             noteSelected: false,
@@ -518,6 +509,36 @@ export default class WorkspaceComponent extends Component {
         }
     }
 
+    updateNotesFromNewLayout = (layout) => {
+        this.setState({positionsFilled: {}}, () => {
+            const currentSequenceCopy = {...this.state.currentSequence}
+            const newElementValueTable = {}
+            const qzNS = sequences.quantizeNoteSequence(currentSequenceCopy, 4/this.state.selectedQZ);
+            const notes = []
+            const numNotes = this.state.currentSequence.notes.length
+
+            for(let i = 0; i < numNotes; i++) {
+                const currentNote = layout[i]
+                const currentNoteValue = this.state.noteArr[currentNote.y]
+                const currentNoteOctave = this.state.elementOctaveTable[currentNote.i]
+                const noteObj = {
+                    pitch: this.state.lookupTable[currentNoteValue + currentNoteOctave],
+                    quantizedStartStep: currentNote.x,
+                    quantizedEndStep: currentNote.x + currentNote.w
+                }
+                notes.push(noteObj)
+                this.registerPosition(currentNote.x, currentNote.x + currentNote.w, currentNote.y)
+                newElementValueTable[`N${i}`] = currentNoteValue;
+            }
+
+            qzNS.notes = notes;
+            this.setState({ 
+                currentSequence: sequences.unquantizeSequence(qzNS, this.state.selectedTP),
+                elementValueTable: newElementValueTable});
+            })
+        
+    }
+
     submit = (component) => {
         this.props.complete(
             this.state.currentSequence,
@@ -550,7 +571,9 @@ export default class WorkspaceComponent extends Component {
                     containerPadding= {[0,0]}
                     margin = {[0,0]}
                     onLayoutChange={(layout) => {
-                        this.setState({layout : layout})
+                        this.setState({layout : layout}, () => {
+                            this.updateNotesFromNewLayout(layout)
+                        })
                     }}
                 >
                 {
