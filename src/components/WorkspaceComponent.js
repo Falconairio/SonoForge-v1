@@ -33,7 +33,9 @@ export default class WorkspaceComponent extends Component {
         layout: [],
         notesToRender: [],
         positionsFilled: {},
+        //this is the number of notes there are in an octave
         numberRows: 12,
+        //3.1875 is the amount in rem that a row should be in height
         rowHeight: 3.1875 * 16,
         numberColumns: 0,
         hasFinishedCalculating: false,
@@ -44,14 +46,13 @@ export default class WorkspaceComponent extends Component {
         isMenuOpen: false,
         specificMenuOpen: 0,
         selectedNoteValue: "",
-        selectedOctave: ""
+        selectedNoteOctave: "4"
     }
 
     componentDidMount = () => {
         this.setState({
             player: new Player(false, {
                 run: (note) => {
-                    console.log();
                     if(this.state.playing) {
                         let soundedNote = valueAndOctaveFromString(
                             this.state.lookupTable[note.pitch]
@@ -320,6 +321,9 @@ export default class WorkspaceComponent extends Component {
             let colorClass = octaveToColor(octave)
             let rowToSet = noteToHeightAdjust(note)
 
+            // console.log(this.state.lookupTable);
+            // console.log(note);
+
             let elementKey = `N${counter}`;
 
             let noteLayout = {
@@ -334,7 +338,9 @@ export default class WorkspaceComponent extends Component {
                 isResizable: true
             }
 
-            this.registerPosition(elementKey,startBeat,endBeat,rowToSet)
+            // console.log(rowToSet + " row to set");
+
+            this.registerPosition(startBeat,endBeat,rowToSet)
 
             let noteObj = {
                 key: elementKey,
@@ -343,7 +349,6 @@ export default class WorkspaceComponent extends Component {
                     this.setState({
                         noteSelected: true,
                         whiteSpaceSelected: false,
-                        // isMenuOpen: false,
                         selectedElement: elementKey,
                         selectedNoteOctave: octave,
                         selectedNoteValue: note
@@ -368,7 +373,7 @@ export default class WorkspaceComponent extends Component {
     registerPosition = (x1,x2,y) => {
         let posObj = this.state.positionsFilled
         for(let i = x1; i < x2; i++) {
-            posObj[`${x1},${y}`] = true;
+            posObj[`${i},${y}`] = true;
         } 
         this.setState({
             positionsFilled: posObj
@@ -409,7 +414,6 @@ export default class WorkspaceComponent extends Component {
                                 whiteSpaceSelected: true,
                                 selectedElement: elementKey
                             })
-                            console.log(elementKey);
                         }
                     }
 
@@ -474,6 +478,44 @@ export default class WorkspaceComponent extends Component {
                 })
             }
         });
+    }
+
+    addNoteAtPosition = () => {
+        if(this.state.whiteSpaceSelected) {
+            const el = this.state.selectedElement;
+            const selectedStep = parseInt(el.substring(1,el.indexOf(",")))
+            const selectedRow = parseInt(el.substring(el.indexOf(",") + 1))
+            const currentSequenceCopy = {...this.state.currentSequence};
+            const qzNS = sequences.quantizeNoteSequence(currentSequenceCopy, 4/this.state.selectedQZ);
+            const notesCopy = [...qzNS.notes];
+            const selectedNote = this.state.noteArr[selectedRow]
+
+            /* The octave chosen will either be the default value held in the state,
+            which is an average octave of 4, or the octave of the last note selected.
+            this makes the assumption that the user will be placing a note in the same
+            octave as the last note */
+            const createdNote = {
+                pitch: this.state.lookupTable[selectedNote + this.state.selectedNoteOctave],
+                quantizedStartStep: selectedStep,
+                quantizedEndStep: selectedStep + 1
+            }
+
+            const insertIndex = notesCopy.findIndex((note) => {
+                return note.quantizedStartStep > createdNote.quantizedStartStep
+            });
+
+            if (insertIndex === -1) {
+                notesCopy.push(createdNote);
+            } else {
+                notesCopy.splice(insertIndex, 0, createdNote);
+            }
+
+            qzNS.notes = notesCopy;
+            this.setState({ currentSequence: 
+                sequences.unquantizeSequence(qzNS, this.state.selectedTP)}, () => {
+                    this.setupGrid()
+                });
+        }
     }
 
     submit = (component) => {
@@ -637,17 +679,9 @@ export default class WorkspaceComponent extends Component {
             : " workspace-page-button inactive"}
             onClick = {() => {
                 if(this.state.whiteSpaceSelected) {
-                    this.setState({
-                        isMenuOpen : true,
-                        specificMenuOpen : 3
-                    })}
+                    this.addNoteAtPosition()
                 }
-            }>Add Note</button>
-                {this.state.isMenuOpen && this.state.specificMenuOpen === 3 && (
-                    <div className="workspace-button-menu">
-                        <h1>Adding Note!</h1>
-                    </div>
-            )}
+            }}>Add Note</button>
             </div>
             <div className="button-container">
             <button className={this.state.noteSelected ? "workspace-page-button active" 
@@ -656,11 +690,11 @@ export default class WorkspaceComponent extends Component {
                 if(this.state.noteSelected) {
                     this.setState({
                         isMenuOpen : true,
-                        specificMenuOpen : 4
+                        specificMenuOpen: 3
                     })}
                 }
             }>Edit Note</button>
-                {this.state.isMenuOpen && this.state.specificMenuOpen === 4 && (
+                {this.state.isMenuOpen && this.state.specificMenuOpen === 3 && (
                     <div className="workspace-button-menu flexcolumn" id = "edit">
                         <div className='flexrow' id = "edittoprow">
                             <div className='flexcolumn'>
@@ -737,10 +771,10 @@ export default class WorkspaceComponent extends Component {
                 onClick= {() => {
                     this.setState({
                         isMenuOpen : true,
-                        specificMenuOpen : 5
+                        specificMenuOpen : 4
                     })}
                 }>Finish</button>
-                {this.state.isMenuOpen && this.state.specificMenuOpen === 5 && (
+                {this.state.isMenuOpen && this.state.specificMenuOpen === 4 && (
                     <div className="workspace-button-menu confirm-menu">
                         <div className='flexcolumn'>
                             <h2>Done Composing?</h2>
