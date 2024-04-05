@@ -52,7 +52,6 @@ export default class WorkspaceComponent extends Component {
     }
 
     componentDidMount = () => {
-        console.log(this.props);
         this.setState({
             player: new Player(false, {
                 run: (note) => {
@@ -161,8 +160,6 @@ export default class WorkspaceComponent extends Component {
             : this.setState({playingGeneration: false})
             return;
         }
-        console.log("THIS THE SEQEUNCE")
-        console.log(sequence.notes.length);
         this.state.player.start(sequence)
     }
 
@@ -224,8 +221,6 @@ export default class WorkspaceComponent extends Component {
             const finalStep = finalSequence[finalSequence.length - 1].quantizedEndStep
             currentSequenceCopy.totalQuantizedSteps = finalStep + (finalStep % spq)
             currentSequenceCopy.totalTime = currentSequenceCopy.totalQuantizedSteps / spq
-            console.log("heres the copy");
-            console.log(currentSequenceCopy);
 
             this.setState({currentSequence: currentSequenceCopy}, () => {
                 this.setState({numberColumns: this.calculateTotalCols()}, () => {
@@ -254,6 +249,49 @@ export default class WorkspaceComponent extends Component {
 
     calculateNoBars = () => {
         return Math.ceil(this.state.currentSequence.totalQuantizedSteps/this.state.selectedQZ)
+    }
+
+    addBar = () => {
+        const currentSequenceCopy = {...this.state.currentSequence}
+        const spq = currentSequenceCopy.quantizationInfo.stepsPerQuarter
+        const totalSteps = currentSequenceCopy.totalQuantizedSteps
+        currentSequenceCopy.totalQuantizedSteps = totalSteps + this.state.selectedQZ
+        currentSequenceCopy.totalTime = currentSequenceCopy.totalQuantizedSteps / spq
+        this.setState({
+            currentSequence: currentSequenceCopy
+        }, () => {
+            this.setState({numberColumns: this.calculateTotalCols()}, () => {
+                this.setupGrid()
+            })
+        })
+    }
+
+    removeBar = () => {
+        const currentSequenceCopy = {...this.state.currentSequence}
+        const seqNotes = currentSequenceCopy.notes;
+        let totalSteps = currentSequenceCopy.totalQuantizedSteps
+        const spq = currentSequenceCopy.quantizationInfo.stepsPerQuarter
+        currentSequenceCopy.totalQuantizedSteps = totalSteps -= this.state.selectedQZ
+        currentSequenceCopy.totalTime = currentSequenceCopy.totalQuantizedSteps / spq
+        const notes = []
+        for(let i = 0; i < seqNotes.length; i++) {
+            const curNote = seqNotes[i]
+            if(curNote.quantizedStartStep < totalSteps) {
+                const noteCopy = {...curNote}
+                if(curNote.quantizedEndStep > totalSteps) {
+                    noteCopy.quantizedEndStep = totalSteps
+                } 
+                notes.push(noteCopy)
+            }
+        }
+        currentSequenceCopy.notes = notes;
+        this.setState({
+            currentSequence: currentSequenceCopy
+        }, () => {
+            this.setState({numberColumns: this.calculateTotalCols()}, () => {
+                this.setupGrid()
+            })
+        })
     }
 
     calculateTotalCols = () => {
@@ -592,6 +630,25 @@ export default class WorkspaceComponent extends Component {
                     />
                 </div>
                 :<div></div>}
+            </div>
+            <div className='bar-buttons flexcolumn'>
+                <div className= 'triangle-button-right'
+                onClick = {() => {
+                    if(this.state.hasFinishedCalculating) {
+                        this.addBar()
+                    }
+                }}></div>
+                <div className= {
+                    this.state.numberColumns === this.state.selectedQZ
+                    ? 'triangle-button-left bb-inactive'
+                    : 'triangle-button-left bb-active'
+                }
+                onClick = {() => {
+                    if(this.state.hasFinishedCalculating &&
+                    this.state.numberColumns > this.state.selectedQZ) {
+                        this.removeBar()
+                    }
+                }}></div>
             </div>
         </div>
         <div className="workspace-footer flexrow" id = "wf">
