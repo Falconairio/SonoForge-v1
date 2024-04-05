@@ -161,6 +161,8 @@ export default class WorkspaceComponent extends Component {
             : this.setState({playingGeneration: false})
             return;
         }
+        console.log("THIS THE SEQEUNCE")
+        console.log(sequence.notes.length);
         this.state.player.start(sequence)
     }
 
@@ -251,7 +253,7 @@ export default class WorkspaceComponent extends Component {
     }
 
     calculateNoBars = () => {
-        return Math.ceil(this.state.currentSequence.totalTime/this.state.selectedTS[0])
+        return Math.ceil(this.state.currentSequence.totalQuantizedSteps/this.state.selectedQZ)
     }
 
     calculateTotalCols = () => {

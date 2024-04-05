@@ -158,6 +158,7 @@ export default class RecognizerComponent extends Component {
       
             var startingTime = 0.0;
             var heldNote = "";
+            let lastNote;
             var heldNoteOctave = 0
         
             // Thanks to PitchDetect: https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
@@ -177,7 +178,6 @@ export default class RecognizerComponent extends Component {
             var currentNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
             var currentOctave = octaveFromPitch(autoCorrelateValue);
 
-            let lastNote;
             let noteLengthToRoundTo = typeOfBeat/amountToRound * beatLengthInSeconds
             let st = roundToNearest(startingTime,noteLengthToRoundTo)
             let et = roundToNearest(audioContext.currentTime,noteLengthToRoundTo)
@@ -186,10 +186,18 @@ export default class RecognizerComponent extends Component {
                 //and there was a note being held
                 if(heldNote.length > 0) {
                     if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2) {
-                        let note = {pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
-                        startTime: st, 
-                        endTime: st !== et ? et : et + noteLengthToRoundTo}
-                        stateSetter(note)
+                        if(!lastNote || (lastNote && st !== lastNote.startTime && et !== lastNote.endTime)) {
+                            if(lastNote && st < lastNote.endTime) {
+                                et = lastNote.endTime
+                            }
+                            let note = {
+                                pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
+                                startTime: st, 
+                                endTime: st !== et ? et : et + noteLengthToRoundTo
+                            }
+                            stateSetter(note)
+                            lastNote = note;
+                        }
                     }
                     heldNote = ""
                     heldNoteOctave = 0
@@ -208,12 +216,18 @@ export default class RecognizerComponent extends Component {
                     //and it is close enough to the note length we need to round to, as well as the held note
                     //not being empty
                     if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0) {
-                        let note = {
-                        pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
-                        startTime: st, 
-                        endTime: st !== et ? et : et + noteLengthToRoundTo
+                        if(!lastNote || (lastNote && st !== lastNote.startTime && et !== lastNote.endTime)) {
+                            if(lastNote && st < lastNote.endTime) {
+                                et = lastNote.endTime
+                            }
+                            let note = {
+                                pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
+                                startTime: st, 
+                                endTime: st !== et ? et : et + noteLengthToRoundTo
+                            }
+                            stateSetter(note)
+                            lastNote = note;
                         }
-                        stateSetter(note)
 
                         try {
                             document.getElementById('note').innerText = currentNote + currentOctave;
