@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Player } from "@magenta/music";
+import { Player, sequences } from "@magenta/music";
 import autoCorrelate from "./../scripts/autocorrelate";
 import generateLookupTable from "./../scripts/noteLTableGenerator";
 import octaveFromPitch from '../scripts/octaveFromPitch';
@@ -32,8 +32,6 @@ export default class RecognizerComponent extends Component {
             notes: this.state.noteSequence.notes
         }, () => {
             // this.handleSetSelects()
-            this.state.player.polySynth.volume._initialValue = 0.5
-            this.state.player.bassSynth.volume._initialValue = 0.5
         })
     }
 
@@ -64,7 +62,6 @@ export default class RecognizerComponent extends Component {
                 this.state.inputStream.getTracks().forEach(function(track) {
                     track.stop();
                 });
-                this.state.inputStream = null;
 
                 clearInterval(this.state.timerCallback)
                 if(this.state.notes.length === 0) {
@@ -75,7 +72,8 @@ export default class RecognizerComponent extends Component {
                 document.getElementById('note').innerText = ""
                 this.setState({
                     isRecording: false, 
-                    timerCallback: null
+                    timerCallback: null,
+                    inputStream: null
                 }, () => {
                     this.handleSetSelects()
                 })
@@ -179,6 +177,7 @@ export default class RecognizerComponent extends Component {
             var currentNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
             var currentOctave = octaveFromPitch(autoCorrelateValue);
 
+            let lastNote;
             let noteLengthToRoundTo = typeOfBeat/amountToRound * beatLengthInSeconds
             let st = roundToNearest(startingTime,noteLengthToRoundTo)
             let et = roundToNearest(audioContext.currentTime,noteLengthToRoundTo)
@@ -209,9 +208,11 @@ export default class RecognizerComponent extends Component {
                     //and it is close enough to the note length we need to round to, as well as the held note
                     //not being empty
                     if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0) {
-                        let note = {pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
+                        let note = {
+                        pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
                         startTime: st, 
-                        endTime: st !== et ? et : et + noteLengthToRoundTo}
+                        endTime: st !== et ? et : et + noteLengthToRoundTo
+                        }
                         stateSetter(note)
 
                         try {
@@ -254,12 +255,12 @@ export default class RecognizerComponent extends Component {
     }
 
     submit = () => {
-        let updateSequence = this.state.noteSequence;
+        let updateSequence = {...this.state.noteSequence};
         let tS = this.state.selectedTS
         updateSequence.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
         updateSequence.tempos = [{time: 0, qpm: this.state.selectedTP}]
         this.props.complete(
-            updateSequence,
+            sequences.quantizeNoteSequence(updateSequence, this.state.selectedQZ/4),
             this.state.selectedTS,
             this.state.selectedQZ,
             this.state.selectedTP,

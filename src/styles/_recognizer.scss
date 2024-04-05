@@ -50,9 +50,13 @@
     display: inline-block;
   }
   
-  .recognizer-column-title > select, .recognizer-column-title > input {
-    margin-top: 1.75rem;
-    margin-bottom: 1.75rem;
+  // .recognizer-column-title > select, .recognizer-column-title > input {
+  //   margin-top: 1.75rem;
+  //   margin-bottom: 1.75rem;
+  //   font-family: $font-family;
+  // }
+  #qz, #tp, #ts {
+    font-family: $font-family;
   }
   
   .tooltip {

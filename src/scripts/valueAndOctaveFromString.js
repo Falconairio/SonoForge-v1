@@ -1,4 +1,5 @@
 function valueAndOctaveFromString (string) {
+    console.log(string);
     let noteValue = "";
     let noteOctave = 0
     for(let i = 0; i < string.length; i++) {

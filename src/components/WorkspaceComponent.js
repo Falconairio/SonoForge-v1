@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { MusicRNN, Player, sequences } from "@magenta/music";
+import { MusicRNN, Player } from "@magenta/music";
 import generateLookupTable from "./../scripts/noteLTableGenerator";
 import noteToHeightAdjust from '../scripts/noteToHeightAdjust';
 import octaveToColor from '../scripts/octaveToColor';
@@ -39,6 +39,7 @@ export default class WorkspaceComponent extends Component {
         rowHeight: 3.1875 * parseFloat(getComputedStyle(document.documentElement).fontSize),
         numberColumns: 0,
         hasFinishedCalculating: false,
+        wantsToChangeLayout: false,
         elementOctaveTable: {},
         elementValueTable: {},
         noteSelected: false,
@@ -51,6 +52,7 @@ export default class WorkspaceComponent extends Component {
     }
 
     componentDidMount = () => {
+        console.log(this.props);
         this.setState({
             player: new Player(false, {
                 run: (note) => {
@@ -81,8 +83,6 @@ export default class WorkspaceComponent extends Component {
             this.setState({
                 numberColumns: this.calculateTotalCols(),
             }, () => {
-                this.state.player.polySynth.volume._initialValue = 0.5
-                this.state.player.bassSynth.volume._initialValue = 0.5
                 this.state.model.initialize();
                 this.setupGrid();
                 document.addEventListener('mousedown', this.handleClickOutside);
@@ -118,7 +118,6 @@ export default class WorkspaceComponent extends Component {
         }
 
         const tS = this.state.selectedTS
-        const notes = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
         let generationCount = 0
         const MAX_GEN_COUNT = 5;
 
@@ -133,7 +132,7 @@ export default class WorkspaceComponent extends Component {
                 return;
             } else {
                 this.state.model
-                .continueSequence(notes, this.state.steps, this.state.temperature)
+                .continueSequence(this.state.currentSequence, this.state.steps, this.state.temperature)
                 .then((sample) => {
                     sample.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
                     sample.tempos = [{time: 0, qpm: this.state.selectedTP}]
@@ -166,55 +165,39 @@ export default class WorkspaceComponent extends Component {
     }
 
     insertGeneration = () => {
-        const genSeqRef = this.state.generatedSequence;
-        const generation = {
-            notes: [...genSeqRef.notes],
-            quantizationInfo: genSeqRef.quantizationInfo,
-            tempos: genSeqRef.tempos,
-            timeSignatures: genSeqRef.timeSignatures,
-            totalQuantizedSteps: genSeqRef.totalQuantizedSteps
-        };
-        const genLength = generation.totalQuantizedSteps;
-        if(generation && generation.notes.length > 0 && this.state.whiteSpaceSelected) {
+        const generationCopy = {...this.state.generatedSequence};
+        const currentSequenceCopy = {...this.state.currentSequence}
+        const genLength = generationCopy.totalQuantizedSteps;
+        if(generationCopy && generationCopy.notes.length > 0 && this.state.whiteSpaceSelected) {
             const el = this.state.selectedElement;
             
             let selectedStep = parseInt(el.substring(1,el.indexOf(",")))
-            const qzNS = sequences.quantizeNoteSequence(this.state.currentSequence, 4/this.state.selectedQZ);
+            const qzNS = {...this.state.currentSequence}
 
-            const firstHalf = {
-                notes: [],
-                quantizationInfo: qzNS.quantizationInfo,
-                tempos: qzNS.tempos,
-                timeSignatures: qzNS.timeSignatures
-            };
+            const firstHalf = [];
 
-            const secondHalf = {
-                notes: [],
-                quantizationInfo: qzNS.quantizationInfo,
-                tempos: qzNS.tempos,
-                timeSignatures: qzNS.timeSignatures
-            };
+            let secondHalf = [];
 
             for(let i = 0; i < qzNS.notes.length; i++) {
                 const currentNote = qzNS.notes[i];
                 if(currentNote.quantizedStartStep < selectedStep &&
                     currentNote.quantizedEndStep <= selectedStep) {
-                        firstHalf.notes.push(currentNote)
+                        firstHalf.push(currentNote)
                 } else if(currentNote.quantizedStartStep >= selectedStep) {
                     const restOfNotes = qzNS.notes.slice(i, qzNS.notes.length);
                     const pushedBackNotes = this.pushBackSequenceByLengthOfSteps(genLength, restOfNotes);
-                    secondHalf.notes = secondHalf.notes.concat(pushedBackNotes);
+                    secondHalf = secondHalf.concat(pushedBackNotes);
                     break;
                 } else if(currentNote.quantizedStartStep < selectedStep &&
                     currentNote.quantizedEndStep > selectedStep) {
-                        firstHalf.notes.push(
+                        firstHalf.push(
                             {
                                 pitch: currentNote.pitch,
                                 quantizedStartStep: currentNote.quantizedStartStep,
                                 quantizedEndStep: selectedStep
                             }
                         )
-                        secondHalf.notes.push(
+                        secondHalf.push(
                             {
                                 pitch: currentNote.pitch,
                                 quantizedStartStep: selectedStep + genLength,
@@ -224,24 +207,25 @@ export default class WorkspaceComponent extends Component {
                         if(i < qzNS.notes.length) {
                             const restOfNotes = qzNS.notes.slice(i + 1, qzNS.notes.length);
                             const pushedBackNotes = this.pushBackSequenceByLengthOfSteps(genLength, restOfNotes);
-                            secondHalf.notes = secondHalf.notes.concat(pushedBackNotes);
+                            secondHalf = secondHalf.concat(pushedBackNotes);
                         }
                         break;
                     }
             }
             const offsetGeneration = this.pushBackSequenceByLengthOfSteps(selectedStep,
-                generation.notes)
+                generationCopy.notes)
 
-            const finalSequence = {
-                notes: firstHalf.notes.concat(offsetGeneration.concat(secondHalf.notes)),
-                quantizationInfo: qzNS.quantizationInfo,
-                tempos: qzNS.tempos,
-                timeSignatures: qzNS.timeSignatures
-            }
+            const finalSequence = firstHalf.concat(offsetGeneration.concat(secondHalf))
 
-            const newSeq = sequences.unquantizeSequence(finalSequence,this.state.selectedTP)
+            currentSequenceCopy.notes = finalSequence
+            const spq = currentSequenceCopy.quantizationInfo.stepsPerQuarter
+            const finalStep = finalSequence[finalSequence.length - 1].quantizedEndStep
+            currentSequenceCopy.totalQuantizedSteps = finalStep + (finalStep % spq)
+            currentSequenceCopy.totalTime = currentSequenceCopy.totalQuantizedSteps / spq
+            console.log("heres the copy");
+            console.log(currentSequenceCopy);
 
-            this.setState({currentSequence: newSeq}, () => {
+            this.setState({currentSequence: currentSequenceCopy}, () => {
                 this.setState({numberColumns: this.calculateTotalCols()}, () => {
                     this.setupGrid()
                 })
@@ -267,8 +251,7 @@ export default class WorkspaceComponent extends Component {
     }
 
     calculateNoBars = () => {
-        let beatLengthInSeconds = 60/this.state.selectedTP
-        return Math.ceil((this.state.currentSequence.totalTime / beatLengthInSeconds)/this.state.selectedTS[0])
+        return Math.ceil(this.state.currentSequence.totalTime/this.state.selectedTS[0])
     }
 
     calculateTotalCols = () => {
@@ -283,6 +266,15 @@ export default class WorkspaceComponent extends Component {
         return (((REM_AMOUNT * remSize) * quantizationAmount) * this.calculateTotalCols())
     }
 
+    /**
+     * A deprecated function which decides which step a note of a particular time would
+     * fall on. I realized in the end it is essentially doing the same thing as the
+     * magenta.js quantization algorithm, and keeping the note sequence in real world
+     * time in state was actually harmful for maintainability of the program. All
+     * sequences have now been changed to quantized sequences.
+     * @param {float} noteTime the time of the start or end of a note 
+     * @returns the step, given the tempo, time signature, and quantization
+     */
     decideBeat = (noteTime) => {
         let beatsInColumn = this.state.selectedQZ/this.state.selectedTS[2]
         let beatsInBar = this.state.selectedTS[0]
@@ -304,8 +296,8 @@ export default class WorkspaceComponent extends Component {
             let fullNote = this.state.lookupTable[value.pitch]
             let octave = parseInt(fullNote.charAt(fullNote.length - 1))
             let note = fullNote.slice(0,fullNote.length - 1)
-            let startBeat = this.decideBeat(value.startTime)
-            let endBeat = this.decideBeat(value.endTime)
+            const startBeat = value.quantizedStartStep
+            const endBeat = value.quantizedEndStep
             let colorClass = octaveToColor(octave)
             let rowToSet = noteToHeightAdjust(note)
 
@@ -321,7 +313,7 @@ export default class WorkspaceComponent extends Component {
                 maxH: 1,
                 minW: 1,
                 isResizable: true,
-                isDraggable: true,
+                isDraggable: true
             }
 
             this.registerPosition(startBeat,endBeat,rowToSet)
@@ -477,8 +469,8 @@ export default class WorkspaceComponent extends Component {
             const selectedStep = parseInt(el.substring(1,el.indexOf(",")))
             const selectedRow = parseInt(el.substring(el.indexOf(",") + 1))
             const currentSequenceCopy = {...this.state.currentSequence};
-            const qzNS = sequences.quantizeNoteSequence(currentSequenceCopy, 4/this.state.selectedQZ);
-            const notesCopy = [...qzNS.notes];
+            // const qzNS = sequences.quantizeNoteSequence(currentSequenceCopy, this.state.selectedQZ/4);
+            const notesCopy = [...currentSequenceCopy.notes];
             const selectedNote = this.state.noteArr[selectedRow]
 
             /* The octave chosen will either be the default value held in the state,
@@ -501,9 +493,8 @@ export default class WorkspaceComponent extends Component {
                 notesCopy.splice(insertIndex, 0, createdNote);
             }
 
-            qzNS.notes = notesCopy;
-            this.setState({ currentSequence: 
-                sequences.unquantizeSequence(qzNS, this.state.selectedTP)}, () => {
+            currentSequenceCopy.notes = notesCopy;
+            this.setState({ currentSequence: currentSequenceCopy}, () => {
                     this.setupGrid()
                 });
         }
@@ -513,7 +504,6 @@ export default class WorkspaceComponent extends Component {
         this.setState({positionsFilled: {}}, () => {
             const currentSequenceCopy = {...this.state.currentSequence}
             const newElementValueTable = {}
-            const qzNS = sequences.quantizeNoteSequence(currentSequenceCopy, 4/this.state.selectedQZ);
             const notes = []
             const numNotes = this.state.currentSequence.notes.length
 
@@ -531,10 +521,12 @@ export default class WorkspaceComponent extends Component {
                 newElementValueTable[`N${i}`] = currentNoteValue;
             }
 
-            qzNS.notes = notes;
+            currentSequenceCopy.notes = notes;
+
             this.setState({ 
-                currentSequence: sequences.unquantizeSequence(qzNS, this.state.selectedTP),
-                elementValueTable: newElementValueTable});
+                currentSequence: currentSequenceCopy,
+                elementValueTable: newElementValueTable,
+                numberColumns: this.calculateTotalCols()});
             })
         
     }
@@ -590,12 +582,14 @@ export default class WorkspaceComponent extends Component {
                 <div></div>
                 }
                 </div>
+                {this.state.hasFinishedCalculating ?
                 <div className='grid-canvas' id='gc'>
                     <Timeline 
                     noBars = {this.calculateNoBars()} 
                     noBeats = {parseInt(this.state.selectedTS[0])} 
                     />
                 </div>
+                :<div></div>}
             </div>
         </div>
         <div className="workspace-footer flexrow" id = "wf">
