@@ -11,16 +11,24 @@ import valueAndOctaveFromString from '../scripts/valueAndOctaveFromString';
 
 export default class WorkspaceComponent extends Component {
     state = {
+        //note player used to listen to the current composition and generations
         player : null,
+        //instance of Magenta.js's MusicRNN model
         model : new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn'),
+        //randomness value for the ML model
         temperature : 0.9,
+        //amount of notes for the model to generate
         steps: 16,
+        //the current data of the composition
         currentSequence: {
             notes: [
             ],
             totalTime: 0
         },
+        //the data of the current AI generation, if there is one
         generatedSequence: null,
+        //a flag to tell if the model is generating a sequence, used to update the generate
+        //button
         generating: false,
         playing: false,
         playingGeneration: false,
@@ -29,9 +37,14 @@ export default class WorkspaceComponent extends Component {
         selectedTS: "4/4",
         selectedQZ: 4,
         selectedTP: 60,
+        //a lookup table filled from a script which has letter octave combos for pitch values
+        ///as well as pitch values for letter octave combos 
         lookupTable: null,
+        //position data of the html elements
         layout: [],
+        //notes to create html elements for
         notesToRender: [],
+        //grid positions to not fill when making whitespace
         positionsFilled: {},
         //this is the number of notes there are in an octave
         numberRows: 12,
@@ -39,13 +52,16 @@ export default class WorkspaceComponent extends Component {
         rowHeight: 3.1875 * parseFloat(getComputedStyle(document.documentElement).fontSize),
         numberColumns: 0,
         hasFinishedCalculating: false,
-        wantsToChangeLayout: false,
+        //a table that can tell you which html elements have which octave value
         elementOctaveTable: {},
+        //a table that can tell you which html elements have which note value
         elementValueTable: {},
         noteSelected: false,
         whiteSpaceSelected: false,
         selectedElement: "",
+        //a flag to tell if there is a menu open
         isMenuOpen: false,
+        //a flag to tell which menu is open, so it can be properly rendered
         specificMenuOpen: 0,
         selectedNoteValue: "",
         selectedNoteOctave: "4"
@@ -93,6 +109,12 @@ export default class WorkspaceComponent extends Component {
         document.removeEventListener('mousedown', this.handleClickOutside);
     }
 
+    /**
+     * A function for when the user clicks outside of the "work area", this
+     * will cancel any selections they have made, which include notes,
+     * whitespace, and menus.
+     * @param {*} event any click made on this page
+     */
     handleClickOutside = (event) => {
         let workspace = document.getElementById("nh");
         let toolbar = document.getElementById("wf")
