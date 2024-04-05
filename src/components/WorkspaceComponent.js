@@ -27,27 +27,27 @@ export default class WorkspaceComponent extends Component {
         },
         //the data of the current AI generation, if there is one
         generatedSequence: null,
-        //a flag to tell if the model is generating a sequence, used to update the generate
-        //button
+        /* a flag to tell if the model is generating a sequence, used to update the generate
+        button */
         generating: false,
-        //two flags for playing the composition and playing the generation respectively,
-        //used to update their respective play buttons
+        /* two flags for playing the composition and playing the generation respectively,
+        used to update their respective play buttons */
         playing: false,
         playingGeneration: false,
-        //a counter that is used when notes are highlighted during playback, since note ids
-        //are just N followed by a counter value, this can be used to easily loop through
-        //them
+        /* a counter that is used when notes are highlighted during playback, since note ids
+        are just N followed by a counter value, this can be used to easily loop through
+        them */
         noteCounter: 0,
-        //the 12 possible note values used by this app, used to populate the note column as
-        //well as decide note value from row position
+        /* the 12 possible note values used by this app, used to populate the note column as
+        well as decide note value from row position */
         noteArr : ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
-        //the three values of time signature, quantization, and tempo, as imported from the
-        //previous screen
+        /* the three values of time signature, quantization, and tempo, as imported from the
+        previous screen */
         selectedTS: "4/4",
         selectedQZ: 4,
         selectedTP: 60,
-        //a lookup table filled from a script which has letter octave combos for pitch values
-        ///as well as pitch values for letter octave combos 
+        /* a lookup table filled from a script which has letter octave combos for pitch values
+        as well as pitch values for letter octave combos */
         lookupTable: null,
         //position data of the html elements
         layout: [],
@@ -68,8 +68,8 @@ export default class WorkspaceComponent extends Component {
         //two flags that tell if either a note has been selected or whitespace has been selected
         noteSelected: false,
         whiteSpaceSelected: false,
-        //the ID of the element selected, stored here so its element can be found when changes
-        //need to be made to the note or the html element itself
+        /* the ID of the element selected, stored here so its element can be found when changes
+        need to be made to the note or the html element itself */
         selectedElement: "",
         //a flag to tell if there is a menu open
         isMenuOpen: false,
@@ -80,10 +80,17 @@ export default class WorkspaceComponent extends Component {
         selectedNoteOctave: "4"
     }
 
+    /**
+     * A React life-cycle method, mandles setting up of the model, player, grid,
+     * and gets the notes and music data from the previous screen
+     */
     componentDidMount = () => {
         this.setState({
             player: new Player(false, {
                 run: (note) => {
+                    /* A handy method from Magenta that is called every time a note is played
+                    in this instance it is used to select the note last played as to highlight
+                    it to the user */
                     if(this.state.playing) {
                         let soundedNote = valueAndOctaveFromString(
                             this.state.lookupTable[note.pitch]
@@ -95,6 +102,8 @@ export default class WorkspaceComponent extends Component {
                     }
                 },
                 stop: () => {
+                    /* A corresponding method that will be called on the stopping of a sequence,
+                    will unselect any notes and tell the state it is done playing */
                     if(this.state.playing) {
                         this.setState({playing: false, selectedElement: "", noteCounter: 0})
                     } else if(this.state.playingGeneration) {
@@ -107,6 +116,11 @@ export default class WorkspaceComponent extends Component {
             selectedQZ: this.props.qz,
             selectedTP: this.props.tp,
             lookupTable: generateLookupTable(),
+        /* The below syntax indicates a state callback, which means that the provided function will
+        run after the state has been set, as state setting is asynchronous. Order matters a lot for
+        this program, as many visual changes cannot update without the corresponding musical data 
+        also being updated. You will see this syntax used a lot, often multiple times in succession
+        as seen below. */
         }, () => {
             this.setState({
                 numberColumns: this.calculateTotalCols(),
@@ -143,7 +157,13 @@ export default class WorkspaceComponent extends Component {
           }
     }
 
+    /**
+     * A function that uses the Magenta.js MusicRNN model to generate a new sequence
+     * using the current sequence. Will attempt to do so 5 times before giving an
+     * error message, though the model will usually output by then.
+     */
     generateSequence = () => {
+        //Stop the player if it is playing. Only one musical operation at a time!
         if (this.state.player.isPlaying()) {  
             this.state.player.stop();
             this.state.playing 
@@ -153,6 +173,7 @@ export default class WorkspaceComponent extends Component {
 
         const tS = this.state.selectedTS
         let generationCount = 0
+        //maximum generations allowed
         const MAX_GEN_COUNT = 5;
 
         const generate = () => {
@@ -165,16 +186,21 @@ export default class WorkspaceComponent extends Component {
                 })
                 return;
             } else {
+                //call the musicRNN model
                 this.state.model
                 .continueSequence(this.state.currentSequence, this.state.steps, this.state.temperature)
                 .then((sample) => {
+                    /* apply the user's selected time signature and tempo, as generated sequences from 
+                    magenta will always come with a tempo of 120 and time signature of 4/4 */
                     sample.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
                     sample.tempos = [{time: 0, qpm: this.state.selectedTP}]
+                    //If a suitable generation was found then apply it
                     if(sample.notes.length > 0) {
                         this.setState({
                             generatedSequence : sample,
                             generating: false
                         })
+                    //if not try again
                     } else {
                         generationCount++;
                         generate();
@@ -606,6 +632,8 @@ export default class WorkspaceComponent extends Component {
         
     }
 
+    /* Submit the current sequence and music data to whichever component needs it, used for both
+    the rerecord and finish buttons */
     submit = (component) => {
         this.props.complete(
             this.state.currentSequence,
