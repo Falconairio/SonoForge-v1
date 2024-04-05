@@ -9,6 +9,10 @@ import "/node_modules/react-grid-layout/css/styles.css"
 import "/node_modules/react-resizable/css/styles.css"
 import valueAndOctaveFromString from '../scripts/valueAndOctaveFromString';
 
+/**
+ * A React Component that displays a musical workspace, while containing all of
+ * the state and logic to make it work. 
+ */
 export default class WorkspaceComponent extends Component {
     state = {
         //note player used to listen to the current composition and generations

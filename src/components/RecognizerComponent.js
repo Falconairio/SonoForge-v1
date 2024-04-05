@@ -124,6 +124,13 @@ export default class RecognizerComponent extends Component {
         })   
     }
 
+    /**
+     * A function that is called to recognize the user's musical input.
+     * Will do so until the user presses the stop button. This function is a
+     * heavily edited version of the Visualize function from Alex Ellis's
+     * tuner program, which can be found at https://alexanderell.is/posts/tuner/.
+     * Massive thanks to Alex Ellis.
+     */
     recognize = () => {
         var source;
         var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -131,9 +138,9 @@ export default class RecognizerComponent extends Component {
         analyser.minDecibels = -100;
         analyser.maxDecibels = -10;
         analyser.smoothingTimeConstant = 0.85;
-        var stateSetter = this.addNoteToSequence
-        var streamSetter = this.setStream
-        var lookupTable = generateLookupTable();
+        const stateSetter = this.addNoteToSequence
+        const streamSetter = this.setStream
+        const lookupTable = generateLookupTable();
         var checkRecording = this.isRecording;
         const amountToRound = this.state.selectedQZ
         const tempo = this.state.selectedTP;
@@ -250,14 +257,23 @@ export default class RecognizerComponent extends Component {
             }
           }
 
-        var noteFromPitch = (frequency) => {
-            var noteNum = 12 * (Math.log( frequency / 440 )/Math.log(2) );
+        // Thanks to PitchDetect: https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
+        /* A sub-function to convert a frequency to a musical note pitch. 
+        NOT WRITTEN BY ME, FOLLOW THE LINK FOR SOURCE */
+        const noteFromPitch = (frequency) => {
+            const noteNum = 12 * (Math.log( frequency / 440 )/Math.log(2) );
             return Math.round( noteNum ) + 69;
         }
 
-        var roundToNearest = (numToRound, numToRoundTo) => {
+        /**
+         * A sub-function to round a note to the nearest quantized time value, using
+         * the user provided quantization value
+         * @param {*} numToRound 
+         * @param {*} numToRoundTo the decimal time value to round to
+         * @returns the rounded number
+         */
+        const roundToNearest = (numToRound, numToRoundTo) => {
             numToRoundTo = 1 / (numToRoundTo)
-        
             return Math.round(numToRound * numToRoundTo) / numToRoundTo;
         }
     }
