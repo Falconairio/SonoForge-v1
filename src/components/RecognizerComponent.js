@@ -17,11 +17,8 @@ export default class RecognizerComponent extends Component {
         selectedQZ: 4,
         selectedTP: 60,
         noteSequence: {
-            notes: [
-                {pitch: 65, startTime: 1.0, endTime: 2.0},
-                {pitch: 62, startTime: 5.0, endTime: 8.0}
-            ],
-            totalTime: 16
+            notes: [],
+            totalTime: 0
           },
         inputsInView: true
     }
@@ -31,15 +28,15 @@ export default class RecognizerComponent extends Component {
             player: new Player(),
             notes: this.state.noteSequence.notes
         }, () => {
-            // this.handleSetSelects()
+            this.handleSetSelects()
         })
     }
 
     handleSetSelects = () => {
         if(this.state.inputsInView) {
-            let qz = document.getElementById("qz")
-            let ts = document.getElementById("ts")
-            let tp = document.getElementById("tp")
+            const qz = document.getElementById("qz")
+            const ts = document.getElementById("ts")
+            const tp = document.getElementById("tp")
 
             qz.value = this.state.selectedQZ
             ts.value = this.state.selectedTS
@@ -54,7 +51,7 @@ export default class RecognizerComponent extends Component {
                     isRecording: true
                 })
 
-                let callback = setInterval(this.updateTimer, 1000)
+                const callback = setInterval(this.updateTimer, 1000)
                 this.setState({timerCallback: callback, inputsInView: false})
 
                 this.recognize()
@@ -109,12 +106,12 @@ export default class RecognizerComponent extends Component {
     }
 
     addNoteToSequence = (note) => {
-        let notesUp = this.state.notes
-        let noteEndTime = Math.ceil(note["endTime"])
+        const notesUp = this.state.notes
+        const noteEndTime = Math.ceil(note["endTime"])
 
         notesUp.push(note)
 
-        let newNS = {
+        const newNS = {
             notes: notesUp,
             totalTime: noteEndTime
         }
@@ -285,8 +282,8 @@ export default class RecognizerComponent extends Component {
     }
 
     submit = () => {
-        let updateSequence = {...this.state.noteSequence};
-        let tS = this.state.selectedTS
+        const updateSequence = {...this.state.noteSequence};
+        const tS = this.state.selectedTS
         updateSequence.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
         updateSequence.tempos = [{time: 0, qpm: this.state.selectedTP}]
         this.props.complete(
