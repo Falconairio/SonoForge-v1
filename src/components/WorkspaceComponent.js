@@ -420,17 +420,17 @@ export default class WorkspaceComponent extends Component {
         const octaveTableCopy = {...this.state.elementOctaveTable}
         const valueTableCopy = {...this.state.elementValueTable}
         this.state.currentSequence.notes.map((value,index) => {
-            let fullNote = this.state.lookupTable[value.pitch]
-            let octave = parseInt(fullNote.charAt(fullNote.length - 1))
-            let note = fullNote.slice(0,fullNote.length - 1)
+            const fullNote = this.state.lookupTable[value.pitch]
+            const octave = parseInt(fullNote.charAt(fullNote.length - 1))
+            const note = fullNote.slice(0,fullNote.length - 1)
             const startBeat = value.quantizedStartStep
             const endBeat = value.quantizedEndStep
-            let colorClass = octaveToColor(octave)
-            let rowToSet = noteToHeightAdjust(note)
+            const colorClass = octaveToColor(octave)
+            const rowToSet = noteToHeightAdjust(note)
 
-            let elementKey = `N${counter}`;
+            const elementKey = `N${counter}`;
 
-            let noteLayout = {
+            const noteLayout = {
                 i: elementKey,
                 x: startBeat,
                 y: rowToSet,
@@ -447,7 +447,7 @@ export default class WorkspaceComponent extends Component {
             octaveTableCopy[elementKey] = octave;
             valueTableCopy[elementKey] = value;
 
-            let noteObj = {
+            const noteObj = {
                 key: elementKey,
                 class: colorClass,
                 onclick: () => {

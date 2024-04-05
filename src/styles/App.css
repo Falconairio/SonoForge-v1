@@ -562,7 +562,6 @@ html, body, .App, #root {
   transform: translate(75%, -50%);
   color: white;
   font-size: 3rem;
-  font-style: italic;
   font-family: "Cabin", sans-serif;
 }
 .triangle-button-right::before {
@@ -573,7 +572,6 @@ html, body, .App, #root {
   transform: translate(-200%, -50%);
   color: white;
   font-size: 3rem;
-  font-style: italic;
   font-family: "Cabin", sans-serif;
 }
 
