@@ -215,11 +215,21 @@ export default class WorkspaceComponent extends Component {
 
         generate();
     }
+
+    /**
+     * A function that plays a given note sequence, unless one is already playing
+     * then the playback will be stopped
+     * @param {NoteSequence} sequence the specified sequence to play, can be the 
+     * current sequence or the AI generated sequence
+     */
     playSequence = (sequence) => {
         if (this.state.player.isPlaying()) {  
             this.state.player.stop();
+            /* depending on which type of sequence is being played, different flags
+            need to be updated */
             this.state.playing && this.state.playingGeneration
-            ? this.setState({playing: false, selectedElement: "", noteCounter: 0, playingGeneration: false})
+            ? this.setState({playing: false, selectedElement: "", noteCounter: 0, 
+            playingGeneration: false})
             : this.state.playing 
             ? this.setState({playing: false, selectedElement: "", noteCounter: 0})
             : this.setState({playingGeneration: false})
@@ -295,6 +305,11 @@ export default class WorkspaceComponent extends Component {
         }
     }
 
+    /**
+     * A function to push back the notes in a sequence by a set length, this 
+     * is used so that sequences can be combined seamlessly in the insert
+     * generation function.
+     */
     pushBackSequenceByLengthOfSteps = (length, sequence) => {
         return sequence.map(note => {
             return {
@@ -307,6 +322,13 @@ export default class WorkspaceComponent extends Component {
         });
     }
 
+    /**
+     * The same function from 
+     * https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
+     * used in the recognizer, slightly modified to return the note value
+     * instead of the corrected pitch
+     * @returns the note value associated with the pitch
+     */
     noteFromPitch = (pitch) => {
         var noteNum = 12 * (Math.log( pitch / 440 )/Math.log(2) );
         return this.state.noteArr[(Math.round( noteNum ) + 69) % 12];
@@ -636,7 +658,7 @@ export default class WorkspaceComponent extends Component {
         
     }
 
-    /* Submit the current sequence and music data to whichever component needs it, used for both
+    /** Submit the current sequence and music data to whichever component needs it, used for both
     the rerecord and finish buttons */
     submit = (component) => {
         this.props.complete(
@@ -735,7 +757,8 @@ export default class WorkspaceComponent extends Component {
                                 <button className="workspace-sub-button active activeclick"
                                 onClick = {() => this.submit("input")}>Yes</button>
                                 <button className="workspace-sub-button active inactiveclick"
-                                onClick = {() => this.setState({isMenuOpen: false, specificMenuOpen: 0})}>No</button>
+                                onClick = {() => this.setState({isMenuOpen: false
+                                , specificMenuOpen: 0})}>No</button>
                             </div>
                         </div>
                     </div>
