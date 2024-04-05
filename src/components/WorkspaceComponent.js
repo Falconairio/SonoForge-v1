@@ -30,10 +30,19 @@ export default class WorkspaceComponent extends Component {
         //a flag to tell if the model is generating a sequence, used to update the generate
         //button
         generating: false,
+        //two flags for playing the composition and playing the generation respectively,
+        //used to update their respective play buttons
         playing: false,
         playingGeneration: false,
+        //a counter that is used when notes are highlighted during playback, since note ids
+        //are just N followed by a counter value, this can be used to easily loop through
+        //them
         noteCounter: 0,
+        //the 12 possible note values used by this app, used to populate the note column as
+        //well as decide note value from row position
         noteArr : ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+        //the three values of time signature, quantization, and tempo, as imported from the
+        //previous screen
         selectedTS: "4/4",
         selectedQZ: 4,
         selectedTP: 60,
@@ -56,13 +65,17 @@ export default class WorkspaceComponent extends Component {
         elementOctaveTable: {},
         //a table that can tell you which html elements have which note value
         elementValueTable: {},
+        //two flags that tell if either a note has been selected or whitespace has been selected
         noteSelected: false,
         whiteSpaceSelected: false,
+        //the ID of the element selected, stored here so its element can be found when changes
+        //need to be made to the note or the html element itself
         selectedElement: "",
         //a flag to tell if there is a menu open
         isMenuOpen: false,
         //a flag to tell which menu is open, so it can be properly rendered
         specificMenuOpen: 0,
+        //the value and octave of the note selected
         selectedNoteValue: "",
         selectedNoteOctave: "4"
     }
