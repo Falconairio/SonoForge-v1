@@ -129,130 +129,103 @@ export default class RecognizerComponent extends Component {
      * Massive thanks to Alex Ellis.
      */
     recognize = () => {
-        var source;
-        var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        var analyser = audioContext.createAnalyser();
+        let source;
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
         analyser.minDecibels = -100;
         analyser.maxDecibels = -10;
         analyser.smoothingTimeConstant = 0.85;
         const stateSetter = this.addNoteToSequence
         const streamSetter = this.setStream
         const lookupTable = generateLookupTable();
-        var checkRecording = this.isRecording;
+        let checkRecording = this.isRecording;
         const amountToRound = this.state.selectedQZ
         const tempo = this.state.selectedTP;
         const beatLengthInSeconds = 60/tempo
         const typeOfBeat = parseInt(this.state.selectedTS.charAt(2))
     
-          navigator.mediaDevices.getUserMedia({audio: true})
-            .then(
-              function(stream) {
+        navigator.mediaDevices.getUserMedia({audio: true})
+        .then(
+            function(stream) {
                 // Initialize the SourceNode
                 source = audioContext.createMediaStreamSource(stream);
                 streamSetter(stream)
                 // Connect the source node to the analyzer
                 source.connect(analyser);
                 updateNote();
-              }
-            )
-            .catch(function(err) {
-              console.error(err)
-              alert('Sorry, microphone permissions are required for the app. Feel free to read on without playing :)')
-            });
+            }
+        )
+        .catch(function(err) {
+            console.error(err)
+            alert('Sorry, microphone permissions are required for the app. Feel free to read on without playing :)')
+        });
+    
+        let startingTime = 0.0;
+        let heldNote = "";
+        let lastNote;
+        let heldNoteOctave = 0
+    
+        // Thanks to PitchDetect: https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
+        const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
       
-            var startingTime = 0.0;
-            var heldNote = "";
-            let lastNote;
-            var heldNoteOctave = 0
-        
-            // Thanks to PitchDetect: https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
-            var noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-      
-          var updateNote = function () {
-
+        const updateNote = function () {
             if(checkRecording()) {
                 requestAnimationFrame(updateNote)
             }
 
-            var bufferLength = analyser.fftSize;
-            var buffer = new Float32Array(bufferLength);
+            const bufferLength = analyser.fftSize;
+            const buffer = new Float32Array(bufferLength);
             analyser.getFloatTimeDomainData(buffer);
-            var autoCorrelateValue = autoCorrelate(buffer, audioContext.sampleRate)
-    
-            var currentNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
-            var currentOctave = octaveFromPitch(autoCorrelateValue);
+            const autoCorrelateValue = autoCorrelate(buffer, audioContext.sampleRate)
 
-            let noteLengthToRoundTo = typeOfBeat/amountToRound * beatLengthInSeconds
+            const currentNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
+            const currentOctave = octaveFromPitch(autoCorrelateValue);
+
+            const noteLengthToRoundTo = typeOfBeat/amountToRound * beatLengthInSeconds
             let st = roundToNearest(startingTime,noteLengthToRoundTo)
             let et = roundToNearest(audioContext.currentTime,noteLengthToRoundTo)
-            //if there is no note detected on this loop
-            if (autoCorrelateValue === -1) {
-                //and there was a note being held
-                if(heldNote.length > 0) {
-                    if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2) {
-                        if(!lastNote || (lastNote && st !== lastNote.startTime && et !== lastNote.endTime)) {
-                            if(lastNote && st < lastNote.endTime) {
-                                et = lastNote.endTime
-                            }
-                            let note = {
-                                pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
-                                startTime: st, 
-                                endTime: st !== et ? et : et + noteLengthToRoundTo
-                            }
-                            stateSetter(note)
-                            lastNote = note;
-                        }
+
+            const noNoteDetected = autoCorrelateValue === -1
+            const differentNoteDetected = (currentNote !== heldNote || currentOctave !== heldNoteOctave)
+            const noteHeldLongEnough = (audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0)
+
+            if(noNoteDetected || differentNoteDetected) {
+                if(noteHeldLongEnough) {
+                    if(lastNote && st < lastNote.endTime) {
+                        st = lastNote.endTime
                     }
+                    const note = {
+                        pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
+                        startTime: st, 
+                        endTime: st !== et ? et : et + noteLengthToRoundTo
+                    }
+                    stateSetter(note)
+                    lastNote = note;
+                }
+
+                if(noNoteDetected) {
                     heldNote = ""
                     heldNoteOctave = 0
-                }
-                try {
-                    document.getElementById('note').innerText = 'None';
-                } catch (error) {
-                    console.log(error)
-                } finally {
-                    return;
-                }
-            //if there IS a note detected on this loop
-            } else {
-                //and it is DIFFERENT to the note 
-                if(currentNote !== heldNote || currentOctave !== heldNoteOctave) {
-                    //and it is close enough to the note length we need to round to, as well as the held note
-                    //not being empty
-                    if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0) {
-                        if(!lastNote || (lastNote && st !== lastNote.startTime && et !== lastNote.endTime)) {
-                            if(lastNote && st < lastNote.endTime) {
-                                et = lastNote.endTime
-                            }
-                            let note = {
-                                pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
-                                startTime: st, 
-                                endTime: st !== et ? et : et + noteLengthToRoundTo
-                            }
-                            stateSetter(note)
-                            lastNote = note;
-                        }
-
-                        try {
-                            document.getElementById('note').innerText = currentNote + currentOctave;
-                        } catch (error) {
-                            console.log(error)
-                        }
-                    }
+                    try {
+                        document.getElementById('note').innerText = 'None';
+                    } catch (error) {
+                        console.log(error)
+                    } 
+                } else {
                     startingTime = audioContext.currentTime
                     heldNote = currentNote
                     heldNoteOctave = currentOctave
-                } else {
-                    if(audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0) {
-                        try {
-                            document.getElementById('note').innerText = currentNote + currentOctave;
-                        } catch (error) {
-                            console.log(error)
-                        }
+                }
+            } else {
+                if(noteHeldLongEnough) {
+                    try {
+                        document.getElementById('note').innerText = currentNote + currentOctave;
+                    } catch (error) {
+                        console.log(error)
                     }
                 }
             }
-          }
+        }
 
         // Thanks to PitchDetect: https://github.com/cwilso/PitchDetect/blob/master/js/pitchdetect.js
         /* A sub-function to convert a frequency to a musical note pitch. 
@@ -270,8 +243,8 @@ export default class RecognizerComponent extends Component {
          * @returns the rounded number
          */
         const roundToNearest = (numToRound, numToRoundTo) => {
-            numToRoundTo = 1 / (numToRoundTo)
-            return Math.round(numToRound * numToRoundTo) / numToRoundTo;
+            const reciprocal = 1 / (numToRoundTo)
+            return Math.round(numToRound * reciprocal) / reciprocal;
         }
     }
 
