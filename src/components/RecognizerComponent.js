@@ -135,7 +135,7 @@ export default class RecognizerComponent extends Component {
         analyser.minDecibels = -100;
         analyser.maxDecibels = -10;
         analyser.smoothingTimeConstant = 0.85;
-        const stateSetter = this.addNoteToSequence
+        const storeNoteInSequence = this.addNoteToSequence
         const streamSetter = this.setStream
         const lookupTable = generateLookupTable();
         let checkRecording = this.isRecording;
@@ -169,40 +169,51 @@ export default class RecognizerComponent extends Component {
         const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
       
         const updateNote = function () {
+            /* if the user has not pressed the stop button yet, schedule another
+            run of this function on the next frame */
             if(checkRecording()) {
                 requestAnimationFrame(updateNote)
             }
 
+            //analyze audio data using the method provided by Alex Ellis and PitchDetect
             const bufferLength = analyser.fftSize;
             const buffer = new Float32Array(bufferLength);
             analyser.getFloatTimeDomainData(buffer);
-            const autoCorrelateValue = autoCorrelate(buffer, audioContext.sampleRate)
+            const detectedPitch = autoCorrelate(buffer, audioContext.sampleRate)
 
-            const currentNote = noteStrings[noteFromPitch(autoCorrelateValue) % 12];
-            const currentOctave = octaveFromPitch(autoCorrelateValue);
+            //get current note data, if there is any
+            const currentNote = noteStrings[noteFromPitch(detectedPitch) % 12];
+            const currentOctave = octaveFromPitch(detectedPitch);
 
+            //snap our note start and end times into place
             const noteLengthToRoundTo = typeOfBeat/amountToRound * beatLengthInSeconds
             let st = roundToNearest(startingTime,noteLengthToRoundTo)
             let et = roundToNearest(audioContext.currentTime,noteLengthToRoundTo)
 
-            const noNoteDetected = autoCorrelateValue === -1
+            //decide what is happening on this frame
+            const noNoteDetected = detectedPitch === -1
             const differentNoteDetected = (currentNote !== heldNote || currentOctave !== heldNoteOctave)
-            const noteHeldLongEnough = (audioContext.currentTime - startingTime >= noteLengthToRoundTo/2 && heldNote.length > 0)
+            const noteHeldLongEnough = (heldNote.length > 0 && audioContext.currentTime - startingTime >= noteLengthToRoundTo/2)
 
+            //do something about the current note event
             if(noNoteDetected || differentNoteDetected) {
+                //resolve the last note's detection
                 if(noteHeldLongEnough) {
                     if(lastNote && st < lastNote.endTime) {
                         st = lastNote.endTime
                     }
                     const note = {
+                        /* find the right pitch value from a lookup table, as 
+                        Magenta itself uses a different pitch system than normal */
                         pitch: lookupTable[`${heldNote}${heldNoteOctave}`], 
                         startTime: st, 
                         endTime: st !== et ? et : et + noteLengthToRoundTo
                     }
-                    stateSetter(note)
+                    storeNoteInSequence(note)
                     lastNote = note;
                 }
 
+                //set the current note stored in memory accordingly
                 if(noNoteDetected) {
                     heldNote = ""
                     heldNoteOctave = 0
@@ -216,6 +227,7 @@ export default class RecognizerComponent extends Component {
                     heldNote = currentNote
                     heldNoteOctave = currentOctave
                 }
+            //if the same note continues to be detected
             } else {
                 if(noteHeldLongEnough) {
                     try {
