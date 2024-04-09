@@ -1,0 +1,15 @@
+.about-blurb {
+    border: 0.1rem solid white;
+    border-radius: 1rem;
+    padding: 2rem;
+    text-wrap: wrap;
+    width: 40rem;
+    font-size: 1rem;
+}
+
+.about-list {
+    text-align: left;
+    li {
+        margin-bottom: 1rem; 
+    }
+}

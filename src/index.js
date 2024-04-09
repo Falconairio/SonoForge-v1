@@ -11,12 +11,14 @@ import {
 } from "react-router-dom";
 import MainActivity from './MainActivity';
 import Home from './Home';
+import About from './About';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
         <Route path = "" element={<Home />}/>
         <Route path = "compose" element={<MainActivity />}/>
+        <Route path = "about" element={<About/>}/>
     </Route>
   )
 );

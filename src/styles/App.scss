@@ -18,6 +18,14 @@ html, body, .App, #root {
     font-family: $font-family;
     color: white;
 }
+
+a {
+    color: white;
+}
+
+a:visited {
+    color: white;
+}
   
 .App {
 text-align: center;
@@ -39,6 +47,7 @@ align-items: center;
 }
 
 @import './homepage';
+@import './aboutpage';
 @import './mainactivity';
 @import './topbar';
 @import './recognizer';

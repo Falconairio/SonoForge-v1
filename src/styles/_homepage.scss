@@ -1,3 +1,21 @@
 .home-blurb {
     max-width: 40rem;
+    &-text {
+        margin-bottom: 2.7rem;
+    }
+}
+
+#homebutton {
+    text-decoration: none;
+    // background-color: white;
+    border: 0.2rem solid white;
+    color: white;
+    padding: 0.8rem 1rem;
+    font-weight: bold;
+    font-size: 1.3rem;
+    border-radius: 10px;
+}
+
+#homebutton:hover {
+    text-decoration: underline;
 }
