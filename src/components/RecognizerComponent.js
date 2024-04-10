@@ -45,7 +45,7 @@ export default class RecognizerComponent extends Component {
     }
 
     handleStartStopRecognition = () => {
-        if(this.state.selectedTP >= 60 && this.state.selectedTP <= 250) {
+        if(this.state.selectedTP >= 1 && this.state.selectedTP <= 220) {
             if(!this.state.isRecording) {
                 this.setState({
                     isRecording: true
@@ -76,7 +76,7 @@ export default class RecognizerComponent extends Component {
                 })
             }
         } else {
-            alert("Please select a tempo within the range 60-250, otherwise your" +
+            alert("Please select a tempo within the range 1-220, otherwise your" +
                 "composition will be near impossible to play :)")
         }
     }
@@ -272,7 +272,7 @@ export default class RecognizerComponent extends Component {
         updateSequence.timeSignatures = [{time: 0, numerator: tS.charAt(0), denominator: tS.charAt(2)}]
         updateSequence.tempos = [{time: 0, qpm: this.state.selectedTP}]
         this.props.complete(
-            sequences.quantizeNoteSequence(updateSequence, this.state.selectedQZ/4),
+            sequences.quantizeNoteSequence(updateSequence, this.state.selectedQZ/tS.charAt(2)),
             this.state.selectedTS,
             this.state.selectedQZ,
             this.state.selectedTP,
@@ -340,13 +340,12 @@ export default class RecognizerComponent extends Component {
                     <select name="timesignatures" id="ts" onChange={
                         (event) => {this.setState({"selectedTS": event.target.value})}
                     }>
-                        {/* <option value="2/2">2/2</option> */}
+                        <option value="2/2">2/2</option>
                         <option value="2/4">2/4</option>
                         <option value="3/4">3/4</option>
                         <option value="4/4">4/4</option>
                         <option value="5/4">5/4</option>
-                        {/* <option value="6/8">6/8</option>
-                        <option value="3/8">3/8</option> */}
+                        <option value="6/8">6/8</option>
                     </select>
                 </div>
             </div>

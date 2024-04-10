@@ -9,8 +9,8 @@ export default class Home extends Component {
         <p className='home-blurb-text'>
             SonoForgeAI is a tool that lets your composition dreams become reality. <br/>
             Just play into the mic and our program will transcribe it for you to tweak. <br/>
-            If you're stumped on what to add next just ask the Magenta.js AI to generate a continuation. <br/>
-            When you're satisfied with your piece you can output it to sheet music for you to play at home. <br/>
+            If you're stumped on what to add next just ask the<br/> Magenta.js AI to generate a continuation. <br/>
+            When you're done, you can output it to sheet music to play at home. <br/>
             Happy composing!
         </p>
         <Link to="/compose" id="homebutton">Let's Go</Link>

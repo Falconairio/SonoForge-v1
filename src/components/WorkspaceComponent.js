@@ -335,7 +335,8 @@ export default class WorkspaceComponent extends Component {
     }
 
     calculateNoBars = () => {
-        return Math.ceil(this.state.currentSequence.totalQuantizedSteps/this.state.selectedQZ)
+        return Math.ceil(this.state.currentSequence.totalQuantizedSteps/
+        ((this.state.selectedQZ/parseInt(this.state.selectedTS[2])) * this.state.selectedTS[0]))
     }
 
     addBar = () => {

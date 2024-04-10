@@ -58,7 +58,7 @@ a:visited {
   text-decoration: none;
   border: 0.2rem solid white;
   color: white;
-  padding: 0.8rem 1rem;
+  padding: 0.6rem 1rem;
   font-weight: bold;
   font-size: 1.3rem;
   border-radius: 10px;
@@ -264,6 +264,46 @@ a:visited {
   color: white;
 }
 
+.octave0 {
+  background-color: black;
+}
+
+.octave1 {
+  background-color: #ffb3b3;
+}
+
+.octave2 {
+  background-color: #ffdab3;
+}
+
+.octave3 {
+  background-color: #ffffb3;
+}
+
+.octave4 {
+  background-color: #b3ffb3;
+}
+
+.octave5 {
+  background-color: #b3b3ff;
+}
+
+.octave6 {
+  background-color: #dab3ff;
+}
+
+.octave7 {
+  background-color: #ffb3ff;
+}
+
+.octave8 {
+  background-color: white;
+}
+
+.transparent {
+  background-color: transparent;
+}
+
 .workspace-container {
   width: 100%;
 }
@@ -351,54 +391,6 @@ a:visited {
   height: 3.1875rem;
   border-bottom: 0.05rem solid gray;
   box-sizing: border-box;
-}
-
-.rect {
-  cursor: pointer;
-  width: 5.5rem;
-  height: 3.1875rem;
-  max-height: 15vh;
-  max-width: 15vh;
-}
-
-.blue {
-  background-color: blue;
-}
-
-.red {
-  background-color: red;
-}
-
-.green {
-  background-color: green;
-}
-
-.yellow {
-  background-color: yellow;
-}
-
-.orange {
-  background-color: orange;
-}
-
-.purple {
-  background-color: purple;
-}
-
-.pink {
-  background-color: pink;
-}
-
-.teal {
-  background-color: teal;
-}
-
-.brown {
-  background-color: brown;
-}
-
-.transparent {
-  background-color: transparent;
 }
 
 .selected {

@@ -1,23 +1,23 @@
 function octaveToColor (octave) {
     switch(octave) {
         case 0:
-            return "blue"
+            return "octave0"
         case 1:
-            return "red"
+            return "octave1"
         case 2:
-            return "green"
+            return "octave2"
         case 3:
-            return "yellow"
+            return "octave3"
         case 4:
-            return "orange"
+            return "octave4"
         case 5:
-            return "purple"
+            return "octave5"
         case 6:
-            return "pink"
+            return "octave6"
         case 7:
-            return "teal"
+            return "octave7"
         case 8:
-            return "brown"
+            return "octave8"
         default:
             return
     }
