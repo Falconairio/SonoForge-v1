@@ -293,8 +293,10 @@ export default class WorkspaceComponent extends Component {
 
             currentSequenceCopy.notes = finalSequence
             const spq = currentSequenceCopy.quantizationInfo.stepsPerQuarter
+            const beatsPerBar = (this.state.selectedTS[0] * (this.state.selectedQZ/this.state.selectedTS[2]));
             const finalStep = finalSequence[finalSequence.length - 1].quantizedEndStep
-            currentSequenceCopy.totalQuantizedSteps = finalStep + (finalStep % spq)
+
+            currentSequenceCopy.totalQuantizedSteps = Math.ceil(finalStep/beatsPerBar) * beatsPerBar
             currentSequenceCopy.totalTime = currentSequenceCopy.totalQuantizedSteps / spq
 
             this.setState({currentSequence: currentSequenceCopy}, () => {
@@ -480,10 +482,10 @@ export default class WorkspaceComponent extends Component {
         })
     }
 
-    registerPosition = (x1,x2,y) => {
+    registerPosition = (startBeat,endBeat,row) => {
         let posObj = this.state.positionsFilled
-        for(let i = x1; i < x2; i++) {
-            posObj[`${i},${y}`] = true;
+        for(let beat = startBeat; beat < endBeat; beat++) {
+            posObj[`${beat},${row}`] = true;
         } 
         this.setState({
             positionsFilled: posObj
@@ -629,6 +631,7 @@ export default class WorkspaceComponent extends Component {
     }
 
     updateNotesFromNewLayout = (layout) => {
+        console.log("hello");
         this.setState({positionsFilled: {}}, () => {
             const currentSequenceCopy = {...this.state.currentSequence}
             const newElementValueTable = {}
