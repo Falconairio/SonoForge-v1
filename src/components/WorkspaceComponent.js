@@ -81,7 +81,13 @@ export default class WorkspaceComponent extends Component {
         specificMenuOpen: 0,
         //the value and octave of the note selected
         selectedNoteValue: "",
-        selectedNoteOctave: "4"
+        selectedNoteOctave: "4",
+        /* an array that holds the order the notes as heard by the music are, this will update as
+        notes get moved around, as it possible a user will drag a note before another. Normally to
+        solve this we would rerender the grid, but we cannot do this, as calling setupGrid in 
+        the layout change function will cause an infinite loop, because setting up the grid will
+        trigger the change flag  */
+        correctOrder: []
     }
 
     /**
@@ -99,7 +105,8 @@ export default class WorkspaceComponent extends Component {
                         let soundedNote = valueAndOctaveFromString(
                             this.state.lookupTable[note.pitch]
                         )
-                        this.setState({selectedElement: "N" + this.state.noteCounter,
+                        // console.log(this.state.correctOrder[this.state.noteCounter]);
+                        this.setState({selectedElement: this.state.correctOrder[this.state.noteCounter].i,
                         noteCounter: this.state.noteCounter + 1,
                         selectedNoteValue: soundedNote[0],
                         selectedNoteOctave: soundedNote[1]})
@@ -420,6 +427,7 @@ export default class WorkspaceComponent extends Component {
         let counter = 0
         let layout = this.state.layout
         let renderedEls = this.state.notesToRender
+        const correctOrder = [];
         const octaveTableCopy = {...this.state.elementOctaveTable}
         const valueTableCopy = {...this.state.elementValueTable}
         this.state.currentSequence.notes.map((value,index) => {
@@ -468,17 +476,21 @@ export default class WorkspaceComponent extends Component {
             
             layout.push(noteLayout)
             renderedEls.push(noteObj)
+            correctOrder.push(noteLayout);
 
             counter++
 
             return true
         })
 
+        console.log("heres the correct order when the grid is setup:");
+        console.log(correctOrder);
         this.setState({
             layout: layout,
             notesToRender: renderedEls,
             elementOctaveTable: octaveTableCopy,
-            elementValueTable: valueTableCopy
+            elementValueTable: valueTableCopy,
+            correctOrder: correctOrder
         })
     }
 
@@ -551,7 +563,8 @@ export default class WorkspaceComponent extends Component {
             hasFinishedCalculating: false,
             selectedElement: "",
             noteSelected: false,
-            whiteSpaceSelected: false
+            whiteSpaceSelected: false,
+            correctOrder: []
         }, () => {
             this.setupNotesOnGrid()
             this.populateWhiteSpace()
@@ -599,7 +612,6 @@ export default class WorkspaceComponent extends Component {
             const selectedStep = parseInt(el.substring(1,el.indexOf(",")))
             const selectedRow = parseInt(el.substring(el.indexOf(",") + 1))
             const currentSequenceCopy = {...this.state.currentSequence};
-            // const qzNS = sequences.quantizeNoteSequence(currentSequenceCopy, this.state.selectedQZ/4);
             const notesCopy = [...currentSequenceCopy.notes];
             const selectedNote = this.state.noteArr[selectedRow]
 
@@ -631,7 +643,6 @@ export default class WorkspaceComponent extends Component {
     }
 
     updateNotesFromNewLayout = (layout) => {
-        console.log("hello");
         this.setState({positionsFilled: {}}, () => {
             const currentSequenceCopy = {...this.state.currentSequence}
             const newElementValueTable = {}
@@ -660,6 +671,24 @@ export default class WorkspaceComponent extends Component {
                 numberColumns: this.calculateTotalCols()});
             })
         
+    }
+
+    setCorrectOrder = (oldElement, newElement) => {
+        let prevOrder = this.state.correctOrder
+        let newOrder = []
+        let added = false;
+        for(let i = 0; i < prevOrder.length; i++) {
+            if(prevOrder[i].i !== oldElement.i) {
+                if(newElement.x <= prevOrder[i].x && !added) {
+                    newOrder.push(newElement)
+                    added = true;
+                } 
+                newOrder.push(prevOrder[i])
+            }
+        }
+        this.setState({
+            correctOrder: newOrder
+        })
     }
 
     /** Submit the current sequence and music data to whichever component needs it, used for both
@@ -699,6 +728,9 @@ export default class WorkspaceComponent extends Component {
                         this.setState({layout : layout}, () => {
                             this.updateNotesFromNewLayout(layout)
                         })
+                    }}
+                    onDragStop={(l,oldEl,newEl) => {
+                        this.setCorrectOrder(oldEl,newEl)
                     }}
                 >
                 {
