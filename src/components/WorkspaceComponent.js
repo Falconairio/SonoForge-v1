@@ -105,11 +105,15 @@ export default class WorkspaceComponent extends Component {
                         let soundedNote = valueAndOctaveFromString(
                             this.state.lookupTable[note.pitch]
                         )
-                        // console.log(this.state.correctOrder[this.state.noteCounter]);
-                        this.setState({selectedElement: this.state.correctOrder[this.state.noteCounter].i,
-                        noteCounter: this.state.noteCounter + 1,
-                        selectedNoteValue: soundedNote[0],
-                        selectedNoteOctave: soundedNote[1]})
+                        try {
+                            this.setState({
+                            selectedElement: this.state.correctOrder[this.state.noteCounter].i,
+                            noteCounter: this.state.noteCounter + 1,
+                            selectedNoteValue: soundedNote[0],
+                            selectedNoteOctave: soundedNote[1]})
+                        } catch(e) {
+                            console.error(e);
+                        }
                     }
                 },
                 stop: () => {
@@ -136,6 +140,8 @@ export default class WorkspaceComponent extends Component {
             this.setState({
                 numberColumns: this.calculateTotalCols(),
             }, () => {
+                console.log("this the current sequence");
+                console.log(this.state.currentSequence);
                 this.state.model.initialize();
                 this.setupGrid();
                 document.addEventListener('mousedown', this.handleClickOutside);
@@ -174,6 +180,15 @@ export default class WorkspaceComponent extends Component {
      * error message, though the model will usually output by then.
      */
     generateSequence = () => {
+        if(this.state.currentSequence.notes.length === 0) {
+            alert("Please add more to your composition, since it is empty the AI has nothing to go off of.")
+            this.setState({
+                generating: false
+            })
+
+            return;
+        }
+
         //Stop the player if it is playing. Only one musical operation at a time!
         if (this.state.player.isPlaying()) {  
             this.state.player.stop();
@@ -351,8 +366,9 @@ export default class WorkspaceComponent extends Component {
     addBar = () => {
         const currentSequenceCopy = {...this.state.currentSequence}
         const spq = currentSequenceCopy.quantizationInfo.stepsPerQuarter
-        const totalSteps = currentSequenceCopy.totalQuantizedSteps
-        currentSequenceCopy.totalQuantizedSteps = totalSteps + this.state.selectedQZ
+        const beatsPerBar = (this.state.selectedTS[0] * (this.state.selectedQZ/this.state.selectedTS[2]));
+        const newSteps = Math.ceil((currentSequenceCopy.totalQuantizedSteps - 1)/beatsPerBar) * beatsPerBar
+        currentSequenceCopy.totalQuantizedSteps = newSteps + (this.state.selectedTS[0] * (this.state.selectedQZ/this.state.selectedTS[2]))
         currentSequenceCopy.totalTime = currentSequenceCopy.totalQuantizedSteps / spq
         this.setState({
             currentSequence: currentSequenceCopy
@@ -365,11 +381,13 @@ export default class WorkspaceComponent extends Component {
 
     removeBar = () => {
         const currentSequenceCopy = {...this.state.currentSequence}
+        
         const seqNotes = currentSequenceCopy.notes;
-        let totalSteps = currentSequenceCopy.totalQuantizedSteps
         const spq = currentSequenceCopy.quantizationInfo.stepsPerQuarter
-        currentSequenceCopy.totalQuantizedSteps = totalSteps -= this.state.selectedQZ
-        currentSequenceCopy.totalTime = currentSequenceCopy.totalQuantizedSteps / spq
+        const beatsPerBar = (this.state.selectedTS[0] * (this.state.selectedQZ/this.state.selectedTS[2]));
+        const totalSteps = Math.floor((currentSequenceCopy.totalQuantizedSteps - 1)/beatsPerBar) * beatsPerBar
+        currentSequenceCopy.totalQuantizedSteps = totalSteps
+        currentSequenceCopy.totalTime = totalSteps / spq
         const notes = []
         for(let i = 0; i < seqNotes.length; i++) {
             const curNote = seqNotes[i]
@@ -483,8 +501,6 @@ export default class WorkspaceComponent extends Component {
             return true
         })
 
-        console.log("heres the correct order when the grid is setup:");
-        console.log(correctOrder);
         this.setState({
             layout: layout,
             notesToRender: renderedEls,
