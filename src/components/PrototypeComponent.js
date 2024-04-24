@@ -4,7 +4,7 @@ import { MusicRNN, Player, sequences } from "@magenta/music";
 import autoCorrelate from "./scripts/autocorrelate";
 import generateLookupTable from "./scripts/noteLTableGenerator";
 
-export default class RecognizerComponent extends Component {
+export default class PrototypeComponent extends Component {
     state = {
         model : new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn'),
         player : null,
