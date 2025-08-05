@@ -718,6 +718,12 @@ export default class WorkspaceComponent extends Component {
             component)
     }
 
+    submitFinish = () => {  
+        this.props.finish(
+            this.state.currentSequence, "output"
+        )
+    }
+
 
   render() {
     return (
@@ -998,7 +1004,7 @@ export default class WorkspaceComponent extends Component {
                             <h2>Done Composing?</h2>
                             <div className="flexrow">
                             <button className="workspace-sub-button active activeclick"
-                                onClick = {() => this.submit("output")}>Yes</button>
+                                onClick = {() => this.submitFinish()}>Yes</button>
                                 <button className="workspace-sub-button active inactiveclick"
                                 onClick = {() => this.setState({isMenuOpen: false, specificMenuOpen: 0})}>No</button>
                             </div>
